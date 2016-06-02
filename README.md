@@ -1,4 +1,4 @@
-# mORMot.REST
+﻿# mORMot.REST
 Testing mORMot REST capabilities.
 It's my first meeting with mORMot, so, something may be unoptimized or implemented wrong.
 Feel free to post your suggestions.
