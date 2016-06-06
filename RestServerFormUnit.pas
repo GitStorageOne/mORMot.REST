@@ -22,9 +22,11 @@ uses
   SynLog,
   SynCommons,
   // Custom
-  RestServerUnit;
+  RestServerUnit, Vcl.ComCtrls;
 
 type
+  lServerAction = (Auto, Start, Stop, Restart);
+
   TForm1 = class(TForm)
     EditPort: TEdit;
     LabelPortCap: TLabel;
@@ -33,22 +35,39 @@ type
     ButtonCLS: TButton;
     TimerRefreshLogMemo: TTimer;
     CheckBoxAutoScroll: TCheckBox;
-    LabelAuthenticationMode: TLabel;
-    ComboBoxAuthMode: TComboBox;
-    ButtonShowAuthInfo: TButton;
+    LabelAuthorizationMode: TLabel;
+    ComboBoxAuthorizationMode: TComboBox;
+    ButtonShowAuthorizationInfo: TButton;
     CheckBoxDisableLog: TCheckBox;
-    CheckBoxUseHTTPsys: TCheckBox;
+    LabelProtocol: TLabel;
+    ComboBoxProtocol: TComboBox;
+    LabelAuthNotAvailable: TLabel;
+    ListViewMethodGroups: TListView;
+    GroupBoxRoleConfiguration: TGroupBox;
+    RadioGroupAuthenticationPolicy: TRadioGroup;
+    ButtonSaveRoleConfiguration: TButton;
+    EditAllowGroupNames: TEdit;
+    EditDenyAllowGroupNames: TEdit;
+    GroupBoxUsers: TGroupBox;
+    ListViewUsers: TListView;
+    EditUserGroup: TEdit;
+    ButtonSaveUsers: TButton;
+    EditUserName: TEdit;
+    ButtonAddUser: TButton;
+    ButtonDeleteUser: TButton;
     procedure ButtonStartStopClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure ButtonCLSClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure TimerRefreshLogMemoTimer(Sender: TObject);
-    procedure ComboBoxAuthModeChange(Sender: TObject);
-    procedure ButtonShowAuthInfoClick(Sender: TObject);
+    procedure ComboBoxAuthorizationModeChange(Sender: TObject);
+    procedure ButtonShowAuthorizationInfoClick(Sender: TObject);
     procedure CheckBoxDisableLogClick(Sender: TObject);
+    procedure ComboBoxProtocolChange(Sender: TObject);
   private
     function LogEvent(Sender: TTextWriter; Level: TSynLogInfo; const Text: RawUTF8): boolean;
-    function GetAuthModeDescription(AM: lAuthMode): string;
+    function GetAuthModeDescription(AM: lAuthorizationMode): string;
+    procedure StartStopServer(ServerAction: lServerAction = Auto);
   public
     { Public declarations }
   end;
@@ -66,6 +85,7 @@ implementation
 
 {$R *.dfm}
 
+// On Form1 create
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   // Create thread safe List with log data class
@@ -79,6 +99,7 @@ begin
     end;
 end;
 
+// On Form1 destory
 procedure TForm1.FormDestroy(Sender: TObject);
 var
   i: integer;
@@ -92,6 +113,29 @@ begin
   List.Clear;
   LogThreadSafeList.UnlockList();
   LogThreadSafeList.Free;
+end;
+
+{ SERVER EVENTS, START / STOP }
+
+// Depends on the server status, start or stop server (create or destroy objects)
+procedure TForm1.StartStopServer(ServerAction: lServerAction = Auto);
+var
+  pServerCreated: boolean;
+  CreateServerOptions: rCreateServerOptions;
+begin
+  pServerCreated := ServerCreated();
+  // Unload current server if required
+  if pServerCreated then
+    DestroyServer();
+  // Create server if required
+  if ((ServerAction = lServerAction.Auto) and not pServerCreated) or ((ServerAction = lServerAction.Restart) and pServerCreated) or (ServerAction = lServerAction.Start) then
+    begin
+      // Create server object with selected Protocol and Auth mode
+      CreateServerOptions.Protocol := lProtocol(ComboBoxProtocol.ItemIndex);
+      CreateServerOptions.AuthMode := lAuthorizationMode(ComboBoxAuthorizationMode.ItemIndex);
+      CreateServerOptions.Port := EditPort.Text;
+      CreateServer(CreateServerOptions);
+    end;
 end;
 
 // Processing mORMot log event
@@ -112,11 +156,13 @@ begin
   end;
 end;
 
+{ UI }
+
 // Get description for AuthMode
-function TForm1.GetAuthModeDescription(AM: lAuthMode): string;
+function TForm1.GetAuthModeDescription(AM: lAuthorizationMode): string;
 begin
   case AM of
-    NoAuthentication:
+    NoAuthorization:
       Result := 'Disabled authentication.';
     URI:
       Result := 'Weak authentication scheme using URL-level parameter';
@@ -144,11 +190,16 @@ begin
   end;
 end;
 
-// Changing server auth mode
-procedure TForm1.ComboBoxAuthModeChange(Sender: TObject);
+// Changing server protocol
+procedure TForm1.ComboBoxProtocolChange(Sender: TObject);
 begin
-  if ServerCreated() then
-    ButtonStartStopClick(ButtonStartStop);
+  StartStopServer(Restart);
+end;
+
+// Changing server auth mode
+procedure TForm1.ComboBoxAuthorizationModeChange(Sender: TObject);
+begin
+  StartStopServer(Restart);
 end;
 
 // Grabbing new events from thread safe list
@@ -175,48 +226,34 @@ begin
   finally
     LogThreadSafeList.UnlockList();
   end;
-  CheckBoxUseHTTPsys.Enabled := not ServerCreated();
   if ServerCreated then
     ButtonStartStop.Caption := 'Stop server'
   else
     ButtonStartStop.Caption := 'Start server';
 end;
 
-// Clears log memo
+// Button clear log
 procedure TForm1.ButtonCLSClick(Sender: TObject);
 begin
   MemoLog.Clear;
 end;
 
-procedure TForm1.ButtonShowAuthInfoClick(Sender: TObject);
+// Button show authorization mode description
+procedure TForm1.ButtonShowAuthorizationInfoClick(Sender: TObject);
 var
-  AM: lAuthMode;
+  AM: lAuthorizationMode;
 begin
-  AM := lAuthMode(ComboBoxAuthMode.ItemIndex);
+  AM := lAuthorizationMode(ComboBoxAuthorizationMode.ItemIndex);
   ShowMessage(GetAuthModeDescription(AM));
 end;
 
+// Button start stop server
 procedure TForm1.ButtonStartStopClick(Sender: TObject);
-var
-  CreateServerOptions: rCreateServerOptions;
 begin
-  if ServerCreated then
-    // Unload current server if required
-    DestroyServer()
-  else
-    begin
-      // Create server object with selected Auth mode
-      if CheckBoxUseHTTPsys.Checked then
-        CreateServerOptions.HttpServerKind := useHttpApiRegisteringURI
-      else
-        CreateServerOptions.HttpServerKind := useBidirSocket;
-      CreateServerOptions.AuthMode := lAuthMode(ComboBoxAuthMode.ItemIndex);
-      CreateServerOptions.Port := EditPort.Text;
-      CreateServer(CreateServerOptions);
-    end;
+  StartStopServer();
 end;
 
-// Enable/Disable loggint to memo (slow down performance when enabled)
+// Checkbox Enable/Disable logging to memo (slow down performance when enabled)
 procedure TForm1.CheckBoxDisableLogClick(Sender: TObject);
 begin
   if not CheckBoxDisableLog.Checked then
@@ -224,5 +261,7 @@ begin
   else
     TSQLLog.Family.Level := [];
 end;
+
+
 
 end.

@@ -26,6 +26,9 @@ type
     function GetCustomRecord(): rCustomRecord;
     function SendCustomRecord(const CustomResult: rCustomRecord): Boolean;
     function SendMultipleCustomRecords(const CustomResult: rCustomRecord; const CustomComplicatedRecord: rCustomComplicatedRecord): Boolean;
+    // function GetMethodCustomResult(): boolean; // without default {result:[]}
+    // function GetCustomResult(): TServiceCustomAnswer;
+    // function ProperErrorHanding(): boolean;
   end;
 
 const
@@ -36,7 +39,6 @@ implementation
 
 initialization
 
-// so that we could use directly IRestMethods instead of TypeInfo(IRestMethods)
-TInterfaceFactory.RegisterInterfaces([TypeInfo(IRestMethods)]);
+TInterfaceFactory.RegisterInterfaces([TypeInfo(IRestMethods)]); // to use directly IRestMethods instead of TypeInfo(IRestMethods)
 
 end.

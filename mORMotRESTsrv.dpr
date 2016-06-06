@@ -14,7 +14,9 @@ uses
 {$R *.res}
 
 begin
+{$IFDEF DEBUG}
   ReportMemoryLeaksOnShutdown := True;
+{$ENDIF}
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   TStyleManager.TrySetStyle('Turquoise Gray');

@@ -91,7 +91,6 @@
         </DelphiCompile>
         <DCCReference Include="RestClientFormUnit.pas">
             <Form>Form1</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="RestMethodsInterfaceUnit.pas"/>
         <DCCReference Include="RestClientUnit.pas"/>

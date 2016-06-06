@@ -25,7 +25,7 @@ type
     procedure FillResultFromServer();
   end;
 
-  TRestMethods = class(TInterfacedObject, IRestMethods)
+  TRestMethods = class(TInjectableObjectRest, IRestMethods)
   public
     function HelloWorld(): string;
     function Sum(val1, val2: Double): Double;

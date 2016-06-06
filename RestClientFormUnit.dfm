@@ -2,7 +2,7 @@ object Form1: TForm1
   Left = 0
   Top = 0
   Caption = 'CL.mORMot REST HTTP test'
-  ClientHeight = 461
+  ClientHeight = 469
   ClientWidth = 1174
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -16,29 +16,65 @@ object Form1: TForm1
   OnDestroy = FormDestroy
   DesignSize = (
     1174
-    461)
+    469)
   PixelsPerInch = 96
   TextHeight = 13
-  object LabelAuthenticationMode: TLabel
-    Left = 250
-    Top = 11
-    Width = 103
+  object LabelAuthorizationMode: TLabel
+    Left = 8
+    Top = 38
+    Width = 97
     Height = 13
-    Caption = 'Authentication mode:'
+    Caption = 'Authorization mode:'
+  end
+  object LabelProtocol: TLabel
+    Left = 68
+    Top = 11
+    Width = 43
+    Height = 13
+    Caption = 'Protocol:'
+  end
+  object LabelAuthNotAvailable: TLabel
+    Left = 399
+    Top = 38
+    Width = 164
+    Height = 13
+    Caption = 'not available with current Protocol'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clRed
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    Visible = False
+    StyleElements = [seClient, seBorder]
+  end
+  object Label1: TLabel
+    Left = 799
+    Top = 11
+    Width = 80
+    Height = 13
+    Caption = 'Server and port:'
+  end
+  object Label2: TLabel
+    Left = 780
+    Top = 38
+    Width = 99
+    Height = 13
+    Caption = 'Login and password:'
   end
   object EditServerAdress: TEdit
-    Left = 8
+    Left = 885
     Top = 8
-    Width = 113
+    Width = 99
     Height = 21
     TabOrder = 0
     Text = '127.0.0.1'
     TextHint = 'Server adress (IP or HostName)'
   end
   object EditServerPort: TEdit
-    Left = 127
+    Left = 990
     Top = 8
-    Width = 113
+    Width = 65
     Height = 21
     TabOrder = 1
     Text = '777'
@@ -46,7 +82,7 @@ object Form1: TForm1
   end
   object ButtonStartStop: TButton
     Left = 1061
-    Top = 14
+    Top = 16
     Width = 105
     Height = 33
     Anchors = [akTop, akRight]
@@ -62,14 +98,14 @@ object Form1: TForm1
   end
   object GroupBoxIRestMethods: TGroupBox
     Left = 8
-    Top = 35
+    Top = 75
     Width = 577
-    Height = 49
+    Height = 54
     Caption = 'IRestMethods (InstanceImplementation = sicSingle)'
     TabOrder = 3
     object ButtonMethHelloWorld: TButton
       Left = 8
-      Top = 16
+      Top = 19
       Width = 81
       Height = 23
       Caption = 'HelloWorld'
@@ -78,7 +114,7 @@ object Form1: TForm1
     end
     object ButtonMethSum: TButton
       Left = 95
-      Top = 16
+      Top = 19
       Width = 50
       Height = 23
       Caption = 'Sum'
@@ -87,7 +123,7 @@ object Form1: TForm1
     end
     object ButtonGetCustomRecord: TButton
       Left = 151
-      Top = 16
+      Top = 19
       Width = 137
       Height = 23
       Caption = 'GetCustomRecord'
@@ -96,7 +132,7 @@ object Form1: TForm1
     end
     object ButtonMethSendCustomRecord: TButton
       Left = 294
-      Top = 16
+      Top = 19
       Width = 115
       Height = 23
       Caption = 'SendCustomRecord'
@@ -105,7 +141,7 @@ object Form1: TForm1
     end
     object ButtonMethSendMultipleCustomRecords: TButton
       Left = 415
-      Top = 16
+      Top = 19
       Width = 154
       Height = 23
       Caption = 'SendMultipleCustomRecords'
@@ -113,30 +149,30 @@ object Form1: TForm1
       OnClick = ButtonMethSendMultipleCustomRecordsClick
     end
   end
-  object ComboBoxAuthMode: TComboBox
-    Left = 359
-    Top = 8
-    Width = 116
+  object ComboBoxAuthorizationMode: TComboBox
+    Left = 117
+    Top = 35
+    Width = 276
     Height = 21
     Style = csDropDownList
     ItemIndex = 0
     TabOrder = 4
-    Text = 'No authentication'
-    OnChange = ComboBoxAuthModeChange
+    Text = 'No authorization'
+    OnChange = ComboBoxAuthorizationModeChange
     Items.Strings = (
-      'No authentication'
-      'URI'
-      'SignedURI'
-      'Default'
-      'None'
-      'HttpBasic'
-      'SSPI')
+      'No authorization'
+      '// URI'
+      '// SignedURI'
+      '// Default'
+      '// None'
+      '// HttpBasic'
+      '// SSPI')
   end
   object MemoLog: TMemo
     Left = 8
-    Top = 90
+    Top = 135
     Width = 1158
-    Height = 335
+    Height = 298
     Anchors = [akLeft, akTop, akRight, akBottom]
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -149,7 +185,7 @@ object Form1: TForm1
   end
   object ButtonCLS: TButton
     Left = 10
-    Top = 431
+    Top = 439
     Width = 38
     Height = 22
     Anchors = [akLeft, akBottom]
@@ -159,7 +195,7 @@ object Form1: TForm1
   end
   object CheckBoxAutoScroll: TCheckBox
     Left = 57
-    Top = 433
+    Top = 441
     Width = 69
     Height = 17
     Anchors = [akLeft, akBottom]
@@ -170,7 +206,7 @@ object Form1: TForm1
   end
   object CheckBoxDisableLog: TCheckBox
     Left = 133
-    Top = 433
+    Top = 441
     Width = 203
     Height = 17
     Anchors = [akLeft, akBottom]
@@ -178,9 +214,45 @@ object Form1: TForm1
     TabOrder = 8
     OnClick = CheckBoxDisableLogClick
   end
+  object ComboBoxProtocol: TComboBox
+    Left = 117
+    Top = 8
+    Width = 276
+    Height = 21
+    Style = csDropDownList
+    ItemIndex = 0
+    TabOrder = 9
+    Text = 'HTTP ( socket )'
+    OnChange = ComboBoxAuthorizationModeChange
+    Items.Strings = (
+      'HTTP ( socket )'
+      'HTTP ( fast http.sys )'
+      'WebSocket ( bidirectional, JSON )'
+      'WebSocket ( bidirectional, binary )'
+      'WebSocket ( bidirectional, binary + AES-CFB 256)'
+      '// Named pipe')
+  end
+  object EditUserLogin: TEdit
+    Left = 885
+    Top = 35
+    Width = 99
+    Height = 21
+    TabOrder = 10
+    Text = 'User'
+    TextHint = 'Login'
+  end
+  object EditUserPassword: TEdit
+    Left = 990
+    Top = 35
+    Width = 65
+    Height = 21
+    TabOrder = 11
+    Text = 'synopse'
+    TextHint = 'Password'
+  end
   object TimerRefreshLogMemo: TTimer
     OnTimer = TimerRefreshLogMemoTimer
     Left = 56
-    Top = 104
+    Top = 144
   end
 end

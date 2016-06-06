@@ -4,7 +4,7 @@ program mORMotRESTcl;
 
 uses
   Vcl.Forms,
-  RestClientFormUnit in 'RestClientFormUnit.pas' {Form1},
+  RestClientFormUnit in 'RestClientFormUnit.pas' {Form1} ,
   RestMethodsInterfaceUnit in 'RestMethodsInterfaceUnit.pas',
   RestClientUnit in 'RestClientUnit.pas',
   Vcl.Themes,
@@ -13,9 +13,13 @@ uses
 {$R *.res}
 
 begin
+{$IFDEF DEBUG}
+  ReportMemoryLeaksOnShutdown := True;
+{$ENDIF}
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   TStyleManager.TrySetStyle('Turquoise Gray');
   Application.CreateForm(TForm1, Form1);
   Application.Run;
+
 end.

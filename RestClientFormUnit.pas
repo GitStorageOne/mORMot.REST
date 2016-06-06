@@ -39,14 +39,21 @@ type
     ButtonMethHelloWorld: TButton;
     ButtonMethSum: TButton;
     ButtonGetCustomRecord: TButton;
-    LabelAuthenticationMode: TLabel;
-    ComboBoxAuthMode: TComboBox;
+    LabelAuthorizationMode: TLabel;
+    ComboBoxAuthorizationMode: TComboBox;
     ButtonMethSendCustomRecord: TButton;
     MemoLog: TMemo;
     ButtonCLS: TButton;
     CheckBoxAutoScroll: TCheckBox;
     CheckBoxDisableLog: TCheckBox;
     ButtonMethSendMultipleCustomRecords: TButton;
+    LabelProtocol: TLabel;
+    ComboBoxProtocol: TComboBox;
+    LabelAuthNotAvailable: TLabel;
+    EditUserLogin: TEdit;
+    EditUserPassword: TEdit;
+    Label1: TLabel;
+    Label2: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure ButtonStartStopClick(Sender: TObject);
     procedure ButtonCLSClick(Sender: TObject);
@@ -55,7 +62,7 @@ type
     procedure ButtonMethHelloWorldClick(Sender: TObject);
     procedure ButtonMethSumClick(Sender: TObject);
     procedure ButtonGetCustomRecordClick(Sender: TObject);
-    procedure ComboBoxAuthModeChange(Sender: TObject);
+    procedure ComboBoxAuthorizationModeChange(Sender: TObject);
     procedure ButtonMethSendCustomRecordClick(Sender: TObject);
     procedure CheckBoxDisableLogClick(Sender: TObject);
     procedure ButtonMethSendMultipleCustomRecordsClick(Sender: TObject);
@@ -181,24 +188,25 @@ end;
 // Manual server unload
 procedure TForm1.ButtonStartStopClick(Sender: TObject);
 var
-  AM: lAuthMode;
   CreateClientOptions: rCreateClientOptions;
 begin
   if ClientCreated() then
-    // Unload current server if required
+    // Unload current client if required
     DestroyClient()
   else
     begin
-      // Create server object with selected Auth mode
-      AM := lAuthMode(ComboBoxAuthMode.ItemIndex);
-      CreateClientOptions.AuthMode := AM;
+      // Create client object
+      CreateClientOptions.Protocol := lProtocol(ComboBoxProtocol.ItemIndex);
+      CreateClientOptions.AuthMode := lAuthorizationMode(ComboBoxAuthorizationMode.ItemIndex);;
       CreateClientOptions.HostOrIP := EditServerAdress.Text;
       CreateClientOptions.Port := EditServerPort.Text;
+      CreateClientOptions.UserLogin := StringToUTF8(EditUserLogin.Text);
+      CreateClientOptions.UserPassword :=  StringToUTF8(EditUserPassword.Text);
       CreateClient(CreateClientOptions);
     end;
 end;
 
-procedure TForm1.ComboBoxAuthModeChange(Sender: TObject);
+procedure TForm1.ComboBoxAuthorizationModeChange(Sender: TObject);
 begin
   if ClientCreated() then
     ButtonStartStopClick(ButtonStartStop);
