@@ -164,7 +164,7 @@ object Form1: TForm1
       '// URI'
       '// SignedURI'
       'Default'
-      '// None'
+      'None'
       '// HttpBasic'
       '// SSPI')
   end

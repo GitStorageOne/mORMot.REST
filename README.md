@@ -30,7 +30,7 @@ Category / Status | Feature
 `.` | URI
 `.` | Signed URI
 `done` | Default
-`.` | None
+`done` | None
 `.` | HTTP Basic
 `.` | SSPI
 **Authorization** |
