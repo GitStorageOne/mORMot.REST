@@ -217,6 +217,7 @@ end;
 // Changing client protocol
 procedure TForm1.ComboBoxProtocolChange(Sender: TObject);
 begin
+  EditServerPort.Enabled := lProtocol(ComboBoxProtocol.ItemIndex) <> lProtocol.NamedPipe;
   StartStopClient(Restart);
 end;
 

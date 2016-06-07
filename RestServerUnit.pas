@@ -152,10 +152,13 @@ begin
         begin
           fHTTPServer := TSQLHttpServer.Create(AnsiString(fServerSettings.Port), [fRestServer], '+', useHttpSocket);
         end;
-      // HTTPsys:
-      // begin
-      // HTTPServer := TSQLHttpServer.Create(AnsiString(Options.Port), [RestServer], '+', useHttpApi); // require manual URI registration
-      // end;
+      {
+        // require manual URI registration, we will not use this option
+        HTTPsys:
+        begin
+        HTTPServer := TSQLHttpServer.Create(AnsiString(Options.Port), [RestServer], '+', useHttpApi);
+        end;
+      }
       HTTPsys:
         begin
           fHTTPServer := TSQLHttpServer.Create(AnsiString(fServerSettings.Port), [fRestServer], '+', useHttpApiRegisteringURI);
@@ -175,9 +178,11 @@ begin
           fHTTPServer := TSQLHttpServer.Create(AnsiString(fServerSettings.Port), [fRestServer], '+', useBidirSocket);
           { WebSocketServerRest := } fHTTPServer.WebSocketsEnable(fRestServer, '2141D32ADAD54D9A9DB56000CC9A4A70', false);
         end;
-      // NamedPipe:
-      // begin
-      // end;
+      NamedPipe:
+        begin
+          if not fRestServer.ExportServerNamedPipe(NAMED_PIPE_NAME) then
+            Exception.Create('Unable to register server with named pipe channel.');
+        end;
     else
       begin
         DeInitialize();

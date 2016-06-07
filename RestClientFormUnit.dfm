@@ -215,7 +215,7 @@ object Form1: TForm1
       'WebSocket ( bidirectional, JSON )'
       'WebSocket ( bidirectional, binary )'
       'WebSocket ( bidirectional, binary + AES-CFB 256)'
-      '// Named pipe')
+      'Named pipe')
   end
   object EditUserLogin: TEdit
     Left = 885

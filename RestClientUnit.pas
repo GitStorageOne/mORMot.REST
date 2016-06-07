@@ -38,7 +38,7 @@ type
   tRestClient = class
   private
     fModel: TSQLModel;
-    fClient: TSQLHttpClientGeneric;
+    fClient: TSQLRestClientURI;
     fClientSettings: rClientSettings;
     fConnectionSettings: rConnectionSettings;
     fInitialized: boolean;
@@ -122,11 +122,10 @@ begin
           fConnectionSettings.ConnectTimeout);
         (fClient as TSQLHttpClientWebsockets).WebSocketsUpgrade('2141D32ADAD54D9A9DB56000CC9A4A70', False);
       end;
-    {
-      NamedPipe:
+    NamedPipe:
       begin
+       fClient := TSQLRestClientURINamedPipe.Create(fModel, '\\' + fClientSettings.HostOrIP + '\pipe\mORMot_' + NAMED_PIPE_NAME);
       end;
-    }
   else
     begin
       DeInitialize();
