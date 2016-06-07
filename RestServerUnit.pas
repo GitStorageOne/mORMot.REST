@@ -41,7 +41,7 @@ type
     constructor Create();
     destructor Destroy(); override;
     function Initialize(SrvSettings: rServerSettings): boolean;
-    procedure DeInitialize();
+    function DeInitialize(): boolean;
   end;
 
 var
@@ -80,138 +80,147 @@ var
 begin
   Result := false;
   // Destroy current object
-  DeInitialize();
-  // Server initialization (!!! for better understanding, each section contain separate code, later should be refactored)
-  fServerSettings := SrvSettings;
-  case fServerSettings.AuthMode of
-    // NoAuthentication
-    NoAuthentication:
-      begin
-        fModel := TSQLModel.Create([], ROOT_NAME);
-        fRestServer := TSQLRestServerFullMemory.Create(fModel, false);
-        fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
-      end;
-    // TSQLRestServerAuthenticationURI
-    URI:
-      begin
-        fModel := TSQLModel.Create([], ROOT_NAME);
-        fRestServer := TSQLRestServerFullMemory.Create(fModel, false { make AuthenticationSchemesCount = 0 } );
-        ServiceFactoryServer := fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
-        fRestServer.AuthenticationRegister(TSQLRestServerAuthenticationURI); // register single authentication mode
-        ApplyAuthenticationRules(ServiceFactoryServer);
-      end;
-    // TSQLRestServerAuthenticationSignedURI
-    {
-      SignedURI:
-      begin
-      end;
-    }
-    // TSQLRestServerAuthenticationDefault
-    Default:
-      begin
-        fModel := TSQLModel.Create([], ROOT_NAME);
-        fRestServer := TSQLRestServerFullMemory.Create(fModel, false { make AuthenticationSchemesCount = 0 } );
-        ServiceFactoryServer := fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
-        fRestServer.AuthenticationRegister(TSQLRestServerAuthenticationDefault); // register single authentication mode
-        ApplyAuthenticationRules(ServiceFactoryServer);
-      end;
-    // TSQLRestServerAuthenticationNone
-    None:
-      begin
-        fModel := TSQLModel.Create([], ROOT_NAME);
-        fRestServer := TSQLRestServerFullMemory.Create(fModel, false { make AuthenticationSchemesCount = 0 } );
-        ServiceFactoryServer := fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
-        fRestServer.AuthenticationRegister(TSQLRestServerAuthenticationNone); // register single authentication mode
-        ApplyAuthenticationRules(ServiceFactoryServer);
-      end;
-    // TSQLRestServerAuthenticationHttpBasic
-    HttpBasic:
-      begin
-        fModel := TSQLModel.Create([], ROOT_NAME);
-        fRestServer := TSQLRestServerFullMemory.Create(fModel, false { make AuthenticationSchemesCount = 0 } );
-        ServiceFactoryServer := fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
-        fRestServer.AuthenticationRegister(TSQLRestServerAuthenticationHttpBasic); // register single authentication mode
-        ApplyAuthenticationRules(ServiceFactoryServer);
-      end;
-    {
-      // TSQLRestServerAuthenticationSSPI
-      SSPI:
-      begin
-      end;
-    }
-  else
-    begin
-      DeInitialize();
-      raise Exception.Create('Selected Authentication mode not available in this build.');
-    end;
-  end;
-  // protocol initialization
-  try
-    case fServerSettings.Protocol of
-      HTTP_Socket:
+  if DeInitialize() then
+    try
+      // Server initialization (!!! for better understanding, each section contain separate code, later should be refactored)
+      fServerSettings := SrvSettings;
+      case fServerSettings.AuthMode of
+        // NoAuthentication
+        NoAuthentication:
+          begin
+            fModel := TSQLModel.Create([], ROOT_NAME);
+            fRestServer := TSQLRestServerFullMemory.Create(fModel, false);
+            fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
+          end;
+        // TSQLRestServerAuthenticationURI
+        URI:
+          begin
+            fModel := TSQLModel.Create([], ROOT_NAME);
+            fRestServer := TSQLRestServerFullMemory.Create(fModel, false { make AuthenticationSchemesCount = 0 } );
+            ServiceFactoryServer := fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
+            fRestServer.AuthenticationRegister(TSQLRestServerAuthenticationURI); // register single authentication mode
+            ApplyAuthenticationRules(ServiceFactoryServer);
+          end;
+        {
+          // TSQLRestServerAuthenticationSignedURI
+          SignedURI:
+          begin
+          end;
+        }
+        // TSQLRestServerAuthenticationDefault
+        Default:
+          begin
+            fModel := TSQLModel.Create([], ROOT_NAME);
+            fRestServer := TSQLRestServerFullMemory.Create(fModel, false { make AuthenticationSchemesCount = 0 } );
+            ServiceFactoryServer := fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
+            fRestServer.AuthenticationRegister(TSQLRestServerAuthenticationDefault); // register single authentication mode
+            ApplyAuthenticationRules(ServiceFactoryServer);
+          end;
+        // TSQLRestServerAuthenticationNone
+        None:
+          begin
+            fModel := TSQLModel.Create([], ROOT_NAME);
+            fRestServer := TSQLRestServerFullMemory.Create(fModel, false { make AuthenticationSchemesCount = 0 } );
+            ServiceFactoryServer := fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
+            fRestServer.AuthenticationRegister(TSQLRestServerAuthenticationNone); // register single authentication mode
+            ApplyAuthenticationRules(ServiceFactoryServer);
+          end;
+        // TSQLRestServerAuthenticationHttpBasic
+        HttpBasic:
+          begin
+            fModel := TSQLModel.Create([], ROOT_NAME);
+            fRestServer := TSQLRestServerFullMemory.Create(fModel, false { make AuthenticationSchemesCount = 0 } );
+            ServiceFactoryServer := fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
+            fRestServer.AuthenticationRegister(TSQLRestServerAuthenticationHttpBasic); // register single authentication mode
+            ApplyAuthenticationRules(ServiceFactoryServer);
+          end;
+        {
+          // TSQLRestServerAuthenticationSSPI
+          SSPI:
+          begin
+          end;
+        }
+      else
         begin
-          fHTTPServer := TSQLHttpServer.Create(AnsiString(fServerSettings.Port), [fRestServer], '+', useHttpSocket);
+          DeInitialize();
+          raise Exception.Create('Selected Authentication mode not available in this build.');
         end;
-      {
-        // require manual URI registration, we will not use this option
+      end;
+      // protocol initialization
+      case fServerSettings.Protocol of
+        HTTP_Socket:
+          begin
+            fHTTPServer := TSQLHttpServer.Create(AnsiString(fServerSettings.Port), [fRestServer], '+', useHttpSocket);
+          end;
+        {
+          // require manual URI registration, we will not use this option
+          HTTPsys:
+          begin
+          HTTPServer := TSQLHttpServer.Create(AnsiString(Options.Port), [RestServer], '+', useHttpApi);
+          end;
+        }
         HTTPsys:
+          begin
+            fHTTPServer := TSQLHttpServer.Create(AnsiString(fServerSettings.Port), [fRestServer], '+', useHttpApiRegisteringURI);
+          end;
+        WebSocketBidir_JSON:
+          begin
+            fHTTPServer := TSQLHttpServer.Create(AnsiString(fServerSettings.Port), [fRestServer], '+', useBidirSocket);
+            { WebSocketServerRest := } fHTTPServer.WebSocketsEnable(fRestServer, '', True);
+          end;
+        WebSocketBidir_Binary:
+          begin
+            fHTTPServer := TSQLHttpServer.Create(AnsiString(fServerSettings.Port), [fRestServer], '+', useBidirSocket);
+            { WebSocketServerRest := } fHTTPServer.WebSocketsEnable(fRestServer, '', false);
+          end;
+        WebSocketBidir_BinaryAES:
+          begin
+            fHTTPServer := TSQLHttpServer.Create(AnsiString(fServerSettings.Port), [fRestServer], '+', useBidirSocket);
+            { WebSocketServerRest := } fHTTPServer.WebSocketsEnable(fRestServer, '2141D32ADAD54D9A9DB56000CC9A4A70', false);
+          end;
+        NamedPipe:
+          begin
+            if not fRestServer.ExportServerNamedPipe(NAMED_PIPE_NAME) then
+              Exception.Create('Unable to register server with named pipe channel.');
+          end;
+      else
         begin
-        HTTPServer := TSQLHttpServer.Create(AnsiString(Options.Port), [RestServer], '+', useHttpApi);
+          DeInitialize();
+          raise Exception.Create('Selected protocol not available in this build.');
         end;
-      }
-      HTTPsys:
-        begin
-          fHTTPServer := TSQLHttpServer.Create(AnsiString(fServerSettings.Port), [fRestServer], '+', useHttpApiRegisteringURI);
-        end;
-      WebSocketBidir_JSON:
-        begin
-          fHTTPServer := TSQLHttpServer.Create(AnsiString(fServerSettings.Port), [fRestServer], '+', useBidirSocket);
-          { WebSocketServerRest := } fHTTPServer.WebSocketsEnable(fRestServer, '', True);
-        end;
-      WebSocketBidir_Binary:
-        begin
-          fHTTPServer := TSQLHttpServer.Create(AnsiString(fServerSettings.Port), [fRestServer], '+', useBidirSocket);
-          { WebSocketServerRest := } fHTTPServer.WebSocketsEnable(fRestServer, '', false);
-        end;
-      WebSocketBidir_BinaryAES:
-        begin
-          fHTTPServer := TSQLHttpServer.Create(AnsiString(fServerSettings.Port), [fRestServer], '+', useBidirSocket);
-          { WebSocketServerRest := } fHTTPServer.WebSocketsEnable(fRestServer, '2141D32ADAD54D9A9DB56000CC9A4A70', false);
-        end;
-      NamedPipe:
-        begin
-          if not fRestServer.ExportServerNamedPipe(NAMED_PIPE_NAME) then
-            Exception.Create('Unable to register server with named pipe channel.');
-        end;
-    else
-      begin
-        DeInitialize();
-        raise Exception.Create('Selected protocol not available in this build.');
       end;
+      Result := True;
+    except
+      on E: Exception do
+        begin
+          ShowMessage(E.ToString);
+          DeInitialize();
+        end;
     end;
-    Result := True;
+  fInitialized := Result;
+end;
+
+function tRestServer.DeInitialize(): boolean;
+begin
+  Result := True;
+  try
+    // if used HttpApiRegisteringURI then remove registration (require run as admin), but seems not work from here
+    if Assigned(fHTTPServer) and (fHTTPServer.HTTPServer.ClassType = THttpApiServer) then
+      THttpApiServer(fHTTPServer.HTTPServer).RemoveUrl(ROOT_NAME, fHTTPServer.Port, false, '+');
+    if Assigned(fHTTPServer) then
+      FreeAndNil(fHTTPServer);
+    if Assigned(fRestServer) then
+      FreeAndNil(fRestServer);
+    if Assigned(fModel) then
+      FreeAndNil(fModel);
+    fInitialized := false;
   except
     on E: Exception do
       begin
         ShowMessage(E.ToString);
-        DeInitialize();
+        Result := false;
       end;
   end;
-  fInitialized := Result;
-end;
-
-procedure tRestServer.DeInitialize();
-begin
-  // if used HttpApiRegisteringURI then remove registration (require run as admin), but seems not work from here
-  if Assigned(fHTTPServer) and (fHTTPServer.HTTPServer.ClassType = THttpApiServer) then
-    THttpApiServer(fHTTPServer.HTTPServer).RemoveUrl(ROOT_NAME, fHTTPServer.Port, false, '+');
-  if Assigned(fHTTPServer) then
-    FreeAndNil(fHTTPServer);
-  if Assigned(fRestServer) then
-    FreeAndNil(fRestServer);
-  if Assigned(fModel) then
-    FreeAndNil(fModel);
-  fInitialized := false;
 end;
 
 initialization
