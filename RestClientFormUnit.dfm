@@ -19,12 +19,12 @@ object Form1: TForm1
     469)
   PixelsPerInch = 96
   TextHeight = 13
-  object LabelAuthorizationMode: TLabel
-    Left = 8
+  object LabelAuthenticationMode: TLabel
+    Left = 37
     Top = 38
-    Width = 97
+    Width = 74
     Height = 13
-    Caption = 'Authorization mode:'
+    Caption = 'Authentication:'
   end
   object LabelProtocol: TLabel
     Left = 68
@@ -149,7 +149,7 @@ object Form1: TForm1
       OnClick = ButtonMethSendMultipleCustomRecordsClick
     end
   end
-  object ComboBoxAuthorizationMode: TComboBox
+  object ComboBoxAuthentication: TComboBox
     Left = 117
     Top = 35
     Width = 276
@@ -157,10 +157,10 @@ object Form1: TForm1
     Style = csDropDownList
     ItemIndex = 0
     TabOrder = 4
-    Text = 'No authorization'
-    OnChange = ComboBoxAuthorizationModeChange
+    Text = 'No authentication'
+    OnChange = ComboBoxAuthenticationChange
     Items.Strings = (
-      'No authorization'
+      'No authentication'
       '// URI'
       '// SignedURI'
       '// Default'
@@ -223,7 +223,7 @@ object Form1: TForm1
     ItemIndex = 0
     TabOrder = 9
     Text = 'HTTP ( socket )'
-    OnChange = ComboBoxAuthorizationModeChange
+    OnChange = ComboBoxAuthenticationChange
     Items.Strings = (
       'HTTP ( socket )'
       'HTTP ( fast http.sys )'

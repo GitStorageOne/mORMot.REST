@@ -17,11 +17,11 @@ uses
 
 type
   lProtocol = (HTTP_Socket, HTTP_HTTPsys, WebSocketBidir_JSON, WebSocketBidir_Binary, WebSocketBidir_BinaryAES, NamedPipe);
-  lAuthorizationMode = (NoAuthorization, URI, SignedURI, Default, None, HttpBasic, SSPI);
+  lAuthenticationMode = (NoAuthentication, URI, SignedURI, Default, None, HttpBasic, SSPI);
 
   rCreateClientOptions = record
     Protocol: lProtocol;
-    AuthMode: lAuthorizationMode;
+    AuthMode: lAuthenticationMode;
     HostOrIP: string;
     Port: string;
     UserLogin: RawUTF8;
@@ -82,7 +82,7 @@ begin
   end;
   case Options.AuthMode of
     // NoAuthentication
-    NoAuthorization:
+    NoAuthentication:
       begin
         // nothing to do here
       end;

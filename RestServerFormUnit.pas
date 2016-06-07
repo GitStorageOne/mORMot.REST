@@ -35,16 +35,16 @@ type
     ButtonCLS: TButton;
     TimerRefreshLogMemo: TTimer;
     CheckBoxAutoScroll: TCheckBox;
-    LabelAuthorizationMode: TLabel;
-    ComboBoxAuthorizationMode: TComboBox;
+    LabelAuthenticationMode: TLabel;
+    ComboBoxAuthentication: TComboBox;
     ButtonShowAuthorizationInfo: TButton;
     CheckBoxDisableLog: TCheckBox;
     LabelProtocol: TLabel;
     ComboBoxProtocol: TComboBox;
     LabelAuthNotAvailable: TLabel;
     ListViewMethodGroups: TListView;
-    GroupBoxRoleConfiguration: TGroupBox;
-    RadioGroupAuthenticationPolicy: TRadioGroup;
+    GroupBoxMethodGroupConfiguration: TGroupBox;
+    RadioGroupAuthorizationPolicy: TRadioGroup;
     ButtonSaveRoleConfiguration: TButton;
     EditAllowGroupNames: TEdit;
     EditDenyAllowGroupNames: TEdit;
@@ -60,13 +60,13 @@ type
     procedure ButtonCLSClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure TimerRefreshLogMemoTimer(Sender: TObject);
-    procedure ComboBoxAuthorizationModeChange(Sender: TObject);
+    procedure ComboBoxAuthenticationChange(Sender: TObject);
     procedure ButtonShowAuthorizationInfoClick(Sender: TObject);
     procedure CheckBoxDisableLogClick(Sender: TObject);
     procedure ComboBoxProtocolChange(Sender: TObject);
   private
     function LogEvent(Sender: TTextWriter; Level: TSynLogInfo; const Text: RawUTF8): boolean;
-    function GetAuthModeDescription(AM: lAuthorizationMode): string;
+    function GetAuthModeDescription(AM: lAuthenticationMode): string;
     procedure StartStopServer(ServerAction: lServerAction = Auto);
   public
     { Public declarations }
@@ -132,7 +132,7 @@ begin
     begin
       // Create server object with selected Protocol and Auth mode
       CreateServerOptions.Protocol := lProtocol(ComboBoxProtocol.ItemIndex);
-      CreateServerOptions.AuthMode := lAuthorizationMode(ComboBoxAuthorizationMode.ItemIndex);
+      CreateServerOptions.AuthMode := lAuthenticationMode(ComboBoxAuthentication.ItemIndex);
       CreateServerOptions.Port := EditPort.Text;
       CreateServer(CreateServerOptions);
     end;
@@ -159,10 +159,10 @@ end;
 { UI }
 
 // Get description for AuthMode
-function TForm1.GetAuthModeDescription(AM: lAuthorizationMode): string;
+function TForm1.GetAuthModeDescription(AM: lAuthenticationMode): string;
 begin
   case AM of
-    NoAuthorization:
+    NoAuthentication:
       Result := 'Disabled authentication.';
     URI:
       Result := 'Weak authentication scheme using URL-level parameter';
@@ -197,7 +197,7 @@ begin
 end;
 
 // Changing server auth mode
-procedure TForm1.ComboBoxAuthorizationModeChange(Sender: TObject);
+procedure TForm1.ComboBoxAuthenticationChange(Sender: TObject);
 begin
   StartStopServer(Restart);
 end;
@@ -241,9 +241,9 @@ end;
 // Button show authorization mode description
 procedure TForm1.ButtonShowAuthorizationInfoClick(Sender: TObject);
 var
-  AM: lAuthorizationMode;
+  AM: lAuthenticationMode;
 begin
-  AM := lAuthorizationMode(ComboBoxAuthorizationMode.ItemIndex);
+  AM := lAuthenticationMode(ComboBoxAuthentication.ItemIndex);
   ShowMessage(GetAuthModeDescription(AM));
 end;
 

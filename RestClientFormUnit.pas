@@ -39,8 +39,8 @@ type
     ButtonMethHelloWorld: TButton;
     ButtonMethSum: TButton;
     ButtonGetCustomRecord: TButton;
-    LabelAuthorizationMode: TLabel;
-    ComboBoxAuthorizationMode: TComboBox;
+    LabelAuthenticationMode: TLabel;
+    ComboBoxAuthentication: TComboBox;
     ButtonMethSendCustomRecord: TButton;
     MemoLog: TMemo;
     ButtonCLS: TButton;
@@ -62,7 +62,7 @@ type
     procedure ButtonMethHelloWorldClick(Sender: TObject);
     procedure ButtonMethSumClick(Sender: TObject);
     procedure ButtonGetCustomRecordClick(Sender: TObject);
-    procedure ComboBoxAuthorizationModeChange(Sender: TObject);
+    procedure ComboBoxAuthenticationChange(Sender: TObject);
     procedure ButtonMethSendCustomRecordClick(Sender: TObject);
     procedure CheckBoxDisableLogClick(Sender: TObject);
     procedure ButtonMethSendMultipleCustomRecordsClick(Sender: TObject);
@@ -197,7 +197,7 @@ begin
     begin
       // Create client object
       CreateClientOptions.Protocol := lProtocol(ComboBoxProtocol.ItemIndex);
-      CreateClientOptions.AuthMode := lAuthorizationMode(ComboBoxAuthorizationMode.ItemIndex);;
+      CreateClientOptions.AuthMode := lAuthenticationMode(ComboBoxAuthentication.ItemIndex);;
       CreateClientOptions.HostOrIP := EditServerAdress.Text;
       CreateClientOptions.Port := EditServerPort.Text;
       CreateClientOptions.UserLogin := StringToUTF8(EditUserLogin.Text);
@@ -206,7 +206,7 @@ begin
     end;
 end;
 
-procedure TForm1.ComboBoxAuthorizationModeChange(Sender: TObject);
+procedure TForm1.ComboBoxAuthenticationChange(Sender: TObject);
 begin
   if ClientCreated() then
     ButtonStartStopClick(ButtonStartStop);

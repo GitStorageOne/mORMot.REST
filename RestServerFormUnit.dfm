@@ -27,12 +27,12 @@ object Form1: TForm1
     Anchors = [akTop, akRight]
     Caption = 'Port:'
   end
-  object LabelAuthorizationMode: TLabel
-    Left = 8
+  object LabelAuthenticationMode: TLabel
+    Left = 37
     Top = 38
-    Width = 97
+    Width = 74
     Height = 13
-    Caption = 'Authorization mode:'
+    Caption = 'Authentication:'
   end
   object LabelProtocol: TLabel
     Left = 68
@@ -117,7 +117,7 @@ object Form1: TForm1
     State = cbChecked
     TabOrder = 4
   end
-  object ComboBoxAuthorizationMode: TComboBox
+  object ComboBoxAuthentication: TComboBox
     Left = 117
     Top = 35
     Width = 276
@@ -125,10 +125,10 @@ object Form1: TForm1
     Style = csDropDownList
     ItemIndex = 0
     TabOrder = 5
-    Text = 'No authorization'
-    OnChange = ComboBoxAuthorizationModeChange
+    Text = 'No authentication'
+    OnChange = ComboBoxAuthenticationChange
     Items.Strings = (
-      'No authorization'
+      'No authentication'
       '// URI'
       '// SignedURI'
       '// Default'
@@ -173,12 +173,12 @@ object Form1: TForm1
       'WebSocket ( bidirectional, binary + AES-CFB 256)'
       '// Named pipe')
   end
-  object GroupBoxRoleConfiguration: TGroupBox
+  object GroupBoxMethodGroupConfiguration: TGroupBox
     Left = 164
     Top = 62
     Width = 520
     Height = 164
-    Caption = 'Group / Role configuration'
+    Caption = 'Method / Group configuration'
     Enabled = False
     TabOrder = 9
     object ListViewMethodGroups: TListView
@@ -245,12 +245,12 @@ object Form1: TForm1
       TextHint = 'Deny group name'
     end
   end
-  object RadioGroupAuthenticationPolicy: TRadioGroup
+  object RadioGroupAuthorizationPolicy: TRadioGroup
     Left = 8
     Top = 62
     Width = 150
     Height = 73
-    Caption = 'Authentication policy'
+    Caption = 'Authorization policy'
     Enabled = False
     ItemIndex = 0
     Items.Strings = (

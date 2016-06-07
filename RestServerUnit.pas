@@ -20,11 +20,11 @@ uses
 
 type
   lProtocol = (HTTP_Socket, HTTPsys, WebSocketBidir_JSON, WebSocketBidir_Binary, WebSocketBidir_BinaryAES, NamedPipe);
-  lAuthorizationMode = (NoAuthorization, URI, SignedURI, Default, None, HttpBasic, SSPI);
+  lAuthenticationMode = (NoAuthentication, URI, SignedURI, Default, None, HttpBasic, SSPI);
 
   rCreateServerOptions = record
     Protocol: lProtocol;
-    AuthMode: lAuthorizationMode;
+    AuthMode: lAuthenticationMode;
     Port: string;
   end;
 
@@ -61,7 +61,7 @@ begin
   // Server initialization (!!! for better understanding, each section contain separate code, later should be refactored)
   case Options.AuthMode of
     // NoAuthentication
-    NoAuthorization:
+    NoAuthentication:
       begin
         Model := TSQLModel.Create([], ROOT_NAME);
         RestServer := TSQLRestServerFullMemory.Create(Model, false);
