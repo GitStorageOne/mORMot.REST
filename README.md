@@ -21,7 +21,7 @@ Category / Status | Feature
 `done` |  WebSocket (bidirectional, JSON)
 `done` |  WebSocket (bidirectional, Binary)
 `done` |  WebSocket (bidirectional, Binary + AES)
-`done` |  Named pipe (on local PC include LAN network support)
+`done` |  Named pipe (on local PC or LAN network)
 **Method interfaces** |
 `done` | IRestMethods (no session support).
 `.` | IRestMethodsEx (session support, callback support).
