@@ -85,6 +85,8 @@ implementation
 
 {$R *.dfm}
 
+{ TForm1 }
+
 // On Form1 create
 procedure TForm1.FormCreate(Sender: TObject);
 begin
@@ -105,14 +107,13 @@ var
   i: integer;
   List: TList<TLocalLog>;
 begin
-  DestroyServer();
   // Clear and destroy LogThreadSafeList
   List := LogThreadSafeList.LockList();
   for i := 0 to List.Count - 1 do
     List.Items[i].Free;
   List.Clear;
   LogThreadSafeList.UnlockList();
-  LogThreadSafeList.Free;
+  FreeAndNil(LogThreadSafeList);
 end;
 
 { SERVER EVENTS, START / STOP }
@@ -121,20 +122,20 @@ end;
 procedure TForm1.StartStopServer(ServerAction: lServerAction = Auto);
 var
   pServerCreated: boolean;
-  CreateServerOptions: rCreateServerOptions;
+  ServerSettings: rServerSettings;
 begin
-  pServerCreated := ServerCreated();
+  pServerCreated := RestServer.Initialized;
   // Unload current server if required
   if pServerCreated then
-    DestroyServer();
+    RestServer.DeInitialize();
   // Create server if required
   if ((ServerAction = lServerAction.Auto) and not pServerCreated) or ((ServerAction = lServerAction.Restart) and pServerCreated) or (ServerAction = lServerAction.Start) then
     begin
       // Create server object with selected Protocol and Auth mode
-      CreateServerOptions.Protocol := lProtocol(ComboBoxProtocol.ItemIndex);
-      CreateServerOptions.AuthMode := lAuthenticationMode(ComboBoxAuthentication.ItemIndex);
-      CreateServerOptions.Port := EditPort.Text;
-      CreateServer(CreateServerOptions);
+      ServerSettings.Protocol := lProtocol(ComboBoxProtocol.ItemIndex);
+      ServerSettings.AuthMode := lAuthenticationMode(ComboBoxAuthentication.ItemIndex);
+      ServerSettings.Port := EditPort.Text;
+      RestServer.Initialize(ServerSettings);
     end;
 end;
 
@@ -144,19 +145,56 @@ var
   List: TList<TLocalLog>;
   LogEventData: TLocalLog;
 begin
-  List := LogThreadSafeList.LockList;
-  Result := True;
-  try
-    LogEventData := TLocalLog.Create();
-    LogEventData.Level := Level;
-    LogEventData.Text := Text;
-    List.Add(LogEventData);
-  finally
-    LogThreadSafeList.UnlockList();
-  end;
+  Result := False;
+  if Assigned(LogThreadSafeList) then
+    begin
+      List := LogThreadSafeList.LockList;
+      try
+        LogEventData := TLocalLog.Create();
+        LogEventData.Level := Level;
+        LogEventData.Text := Text;
+        List.Add(LogEventData);
+        Result := True;
+      finally
+        LogThreadSafeList.UnlockList();
+      end;
+    end;
 end;
 
 { UI }
+
+// Grabbing new events from thread safe list
+procedure TForm1.TimerRefreshLogMemoTimer(Sender: TObject);
+var
+  List: TList<TLocalLog>;
+  i: integer;
+begin
+  if Assigned(LogThreadSafeList) then
+    begin
+      List := LogThreadSafeList.LockList();
+      try
+        if Assigned(Form1) and not Application.Terminated and (List.Count > 0) then
+          begin
+            for i := 0 to List.Count - 1 do
+              begin
+                Form1.MemoLog.Lines.BeginUpdate();
+                Form1.MemoLog.Lines.Add(string(List.Items[i].Text));
+                Form1.MemoLog.Lines.EndUpdate();
+                List.Items[i].Free;
+              end;
+            List.Clear();
+            if CheckBoxAutoScroll.Checked then
+              SendMessage(Form1.MemoLog.Handle, WM_VSCROLL, SB_BOTTOM, 0);
+          end;
+      finally
+        LogThreadSafeList.UnlockList();
+      end;
+    end;
+  if RestServer.Initialized then
+    ButtonStartStop.Caption := 'Stop server'
+  else
+    ButtonStartStop.Caption := 'Start server';
+end;
 
 // Get description for AuthMode
 function TForm1.GetAuthModeDescription(AM: lAuthenticationMode): string;
@@ -196,40 +234,10 @@ begin
   StartStopServer(Restart);
 end;
 
-// Changing server auth mode
+// Changing server authentication mode
 procedure TForm1.ComboBoxAuthenticationChange(Sender: TObject);
 begin
   StartStopServer(Restart);
-end;
-
-// Grabbing new events from thread safe list
-procedure TForm1.TimerRefreshLogMemoTimer(Sender: TObject);
-var
-  List: TList<TLocalLog>;
-  i: integer;
-begin
-  List := LogThreadSafeList.LockList();
-  try
-    if Assigned(Form1) and not Application.Terminated and (List.Count > 0) then
-      begin
-        for i := 0 to List.Count - 1 do
-          begin
-            Form1.MemoLog.Lines.BeginUpdate();
-            Form1.MemoLog.Lines.Add(string(List.Items[i].Text));
-            Form1.MemoLog.Lines.EndUpdate();
-            List.Items[i].Free;
-          end;
-        List.Clear();
-        if CheckBoxAutoScroll.Checked then
-          SendMessage(Form1.MemoLog.Handle, WM_VSCROLL, SB_BOTTOM, 0);
-      end;
-  finally
-    LogThreadSafeList.UnlockList();
-  end;
-  if ServerCreated then
-    ButtonStartStop.Caption := 'Stop server'
-  else
-    ButtonStartStop.Caption := 'Start server';
 end;
 
 // Button clear log
@@ -261,7 +269,5 @@ begin
   else
     TSQLLog.Family.Level := [];
 end;
-
-
 
 end.

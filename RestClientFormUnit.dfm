@@ -163,7 +163,7 @@ object Form1: TForm1
       'No authentication'
       '// URI'
       '// SignedURI'
-      '// Default'
+      'Default'
       '// None'
       '// HttpBasic'
       '// SSPI')
@@ -223,7 +223,7 @@ object Form1: TForm1
     ItemIndex = 0
     TabOrder = 9
     Text = 'HTTP ( socket )'
-    OnChange = ComboBoxAuthenticationChange
+    OnChange = ComboBoxProtocolChange
     Items.Strings = (
       'HTTP ( socket )'
       'HTTP ( fast http.sys )'

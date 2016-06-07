@@ -26,8 +26,7 @@ type
     function GetCustomRecord(): rCustomRecord;
     function SendCustomRecord(const CustomResult: rCustomRecord): Boolean;
     function SendMultipleCustomRecords(const CustomResult: rCustomRecord; const CustomComplicatedRecord: rCustomComplicatedRecord): Boolean;
-    // function GetMethodCustomResult(): boolean; // without default {result:[]}
-    // function GetCustomResult(): TServiceCustomAnswer;
+    // function GetMethodCustomResult(): TServiceCustomAnswer; // without default {result:[]}
     // function ProperErrorHanding(): boolean;
   end;
 

@@ -30,6 +30,8 @@ type
     procedure FillFromClient();
   end;
 
+  lClientAction = (Auto, Start, Stop, Restart);
+
   TForm1 = class(TForm)
     EditServerAdress: TEdit;
     EditServerPort: TEdit;
@@ -66,9 +68,11 @@ type
     procedure ButtonMethSendCustomRecordClick(Sender: TObject);
     procedure CheckBoxDisableLogClick(Sender: TObject);
     procedure ButtonMethSendMultipleCustomRecordsClick(Sender: TObject);
+    procedure ComboBoxProtocolChange(Sender: TObject);
   private
     { Private declarations }
     function LogEvent(Sender: TTextWriter; Level: TSynLogInfo; const Text: RawUTF8): boolean;
+    procedure StartStopClient(ClientAction: lClientAction = Auto);
   public
     { Public declarations }
   end;
@@ -101,6 +105,7 @@ end;
 
 { Form1 }
 
+// On Form1 create
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   // Create thread safe List with log data class
@@ -114,19 +119,43 @@ begin
     end;
 end;
 
+// On Form1 destory
 procedure TForm1.FormDestroy(Sender: TObject);
 var
   i: Integer;
   List: TList<TLocalLog>;
 begin
-  DestroyClient();
   // Clear and destroy LogThreadSafeList
   List := LogThreadSafeList.LockList();
   for i := 0 to List.Count - 1 do
     List.Items[i].Free;
   List.Clear;
   LogThreadSafeList.UnlockList();
-  LogThreadSafeList.Free;
+  FreeAndNil(LogThreadSafeList);
+end;
+
+{ CLIENT EVENTS, START / STOP }
+
+// Depends on the client status, start or stop client (create or destroy objects)
+procedure TForm1.StartStopClient(ClientAction: lClientAction = Auto);
+var
+  pClientCreated: boolean;
+  ClientSettings: rClientSettings;
+begin
+  pClientCreated := RestClient.Initialized;
+  // Unload current client if required
+  RestClient.DeInitialize();
+  // Create client if required
+  if ((ClientAction = lClientAction.Auto) and not pClientCreated) or ((ClientAction = lClientAction.Restart) and pClientCreated) or (ClientAction = lClientAction.Start) then
+    begin
+      ClientSettings.Protocol := lProtocol(ComboBoxProtocol.ItemIndex);
+      ClientSettings.AuthMode := lAuthenticationMode(ComboBoxAuthentication.ItemIndex);;
+      ClientSettings.HostOrIP := EditServerAdress.Text;
+      ClientSettings.Port := EditServerPort.Text;
+      ClientSettings.UserLogin := StringToUTF8(EditUserLogin.Text);
+      ClientSettings.UserPassword := StringToUTF8(EditUserPassword.Text);
+      RestClient.Initialize(ClientSettings);
+    end;
 end;
 
 // Processing mORMot log event
@@ -135,19 +164,23 @@ var
   List: TList<TLocalLog>;
   LogEventData: TLocalLog;
 begin
-  List := LogThreadSafeList.LockList;
-  Result := True;
-  try
-    LogEventData := TLocalLog.Create();
-    LogEventData.Level := Level;
-    LogEventData.Text := Text;
-    List.Add(LogEventData);
-  finally
-    LogThreadSafeList.UnlockList();
-  end;
+  Result := False;
+  if Assigned(LogThreadSafeList) then
+    begin
+      List := LogThreadSafeList.LockList;
+      try
+        LogEventData := TLocalLog.Create();
+        LogEventData.Level := Level;
+        LogEventData.Text := Text;
+        List.Add(LogEventData);
+        Result := True;
+      finally
+        LogThreadSafeList.UnlockList();
+      end;
+    end;
 end;
 
-// Changing client auth mode
+{ UI }
 
 // Grabbing new events from thread safe list
 procedure TForm1.TimerRefreshLogMemoTimer(Sender: TObject);
@@ -155,28 +188,43 @@ var
   List: TList<TLocalLog>;
   i: Integer;
 begin
-  List := LogThreadSafeList.LockList();
-  try
-    if Assigned(Form1) and not Application.Terminated and (List.Count > 0) then
-      begin
-        for i := 0 to List.Count - 1 do
+  if Assigned(LogThreadSafeList) then
+    begin
+      List := LogThreadSafeList.LockList();
+      try
+        if Assigned(Form1) and not Application.Terminated and (List.Count > 0) then
           begin
-            Form1.MemoLog.Lines.BeginUpdate();
-            Form1.MemoLog.Lines.Add(string(List.Items[i].Text));
-            Form1.MemoLog.Lines.EndUpdate();
-            List.Items[i].Free;
+            for i := 0 to List.Count - 1 do
+              begin
+                Form1.MemoLog.Lines.BeginUpdate();
+                Form1.MemoLog.Lines.Add(string(List.Items[i].Text));
+                Form1.MemoLog.Lines.EndUpdate();
+                List.Items[i].Free;
+              end;
+            List.Clear();
+            if CheckBoxAutoScroll.Checked then
+              SendMessage(Form1.MemoLog.Handle, WM_VSCROLL, SB_BOTTOM, 0);
           end;
-        List.Clear();
-        if CheckBoxAutoScroll.Checked then
-          SendMessage(Form1.MemoLog.Handle, WM_VSCROLL, SB_BOTTOM, 0);
+      finally
+        LogThreadSafeList.UnlockList();
       end;
-  finally
-    LogThreadSafeList.UnlockList();
-  end;
-  if ClientCreated() then
+    end;
+  if RestClient.Initialized then
     ButtonStartStop.Caption := 'Stop client'
   else
     ButtonStartStop.Caption := 'Start client';
+end;
+
+// Changing client protocol
+procedure TForm1.ComboBoxProtocolChange(Sender: TObject);
+begin
+  StartStopClient(Restart);
+end;
+
+// Changing client authentication mode
+procedure TForm1.ComboBoxAuthenticationChange(Sender: TObject);
+begin
+  StartStopClient(Restart);
 end;
 
 // Clears log memo
@@ -185,33 +233,13 @@ begin
   MemoLog.Clear;
 end;
 
-// Manual server unload
+// Button start stop client
 procedure TForm1.ButtonStartStopClick(Sender: TObject);
-var
-  CreateClientOptions: rCreateClientOptions;
 begin
-  if ClientCreated() then
-    // Unload current client if required
-    DestroyClient()
-  else
-    begin
-      // Create client object
-      CreateClientOptions.Protocol := lProtocol(ComboBoxProtocol.ItemIndex);
-      CreateClientOptions.AuthMode := lAuthenticationMode(ComboBoxAuthentication.ItemIndex);;
-      CreateClientOptions.HostOrIP := EditServerAdress.Text;
-      CreateClientOptions.Port := EditServerPort.Text;
-      CreateClientOptions.UserLogin := StringToUTF8(EditUserLogin.Text);
-      CreateClientOptions.UserPassword :=  StringToUTF8(EditUserPassword.Text);
-      CreateClient(CreateClientOptions);
-    end;
+  StartStopClient();
 end;
 
-procedure TForm1.ComboBoxAuthenticationChange(Sender: TObject);
-begin
-  if ClientCreated() then
-    ButtonStartStopClick(ButtonStartStop);
-end;
-
+// Checkbox Enable/Disable logging to memo (slow down performance when enabled)
 procedure TForm1.CheckBoxDisableLogClick(Sender: TObject);
 begin
   if not CheckBoxDisableLog.Checked then
@@ -220,37 +248,37 @@ begin
     TSQLLog.Family.Level := [];
 end;
 
-{ RestServerMethods execution }
+{ IRestMethods execution }
 
 procedure TForm1.ButtonMethHelloWorldClick(Sender: TObject);
 begin
-  if Assigned(RestServerMethods) then
-    RestServerMethods.HelloWorld();
+  if Assigned(RestClient.RestMethods) then
+    RestClient.RestMethods.HelloWorld();
 end;
 
 procedure TForm1.ButtonMethSendCustomRecordClick(Sender: TObject);
 var
   CustomResult: rCustomRecord;
 begin
-  if Assigned(RestServerMethods) then
+  if Assigned(RestClient.RestMethods) then
     begin
       CustomResult.FillFromClient();
-      RestServerMethods.SendCustomRecord(CustomResult);
+      RestClient.RestMethods.SendCustomRecord(CustomResult);
     end;
 end;
 
 procedure TForm1.ButtonMethSumClick(Sender: TObject);
 begin
-  if Assigned(RestServerMethods) then
-    RestServerMethods.Sum(Random(100) + 0.6, Random(100) + 0.3);
+  if Assigned(RestClient.RestMethods) then
+    RestClient.RestMethods.Sum(Random(100) + 0.6, Random(100) + 0.3);
 end;
 
 procedure TForm1.ButtonGetCustomRecordClick(Sender: TObject);
 var
   CustomResult: rCustomRecord;
 begin
-  if Assigned(RestServerMethods) then
-    CustomResult := RestServerMethods.GetCustomRecord();
+  if Assigned(RestClient.RestMethods) then
+    CustomResult := RestClient.RestMethods.GetCustomRecord();
 end;
 
 procedure TForm1.ButtonMethSendMultipleCustomRecordsClick(Sender: TObject);
@@ -258,13 +286,13 @@ var
   cr: rCustomRecord;
   ccr: rCustomComplicatedRecord;
 begin
-  if Assigned(RestServerMethods) then
+  if Assigned(RestClient.RestMethods) then
     begin
       cr.FillFromClient();
       ccr.SimpleString := 'Simple string, Простая строка, 単純な文字列';
       ccr.SimpleInteger := 100500;
       ccr.AnotherRecord := cr;
-      RestServerMethods.SendMultipleCustomRecords(cr, ccr);
+      RestClient.RestMethods.SendMultipleCustomRecords(cr, ccr);
     end;
 end;
 

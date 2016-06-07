@@ -1,4 +1,4 @@
-# mORMot.REST
+﻿# mORMot.REST
 Testing mORMot REST capabilities.  
 It's my first meeting with mORMot, so, something may be unoptimized or implemented wrong.  
 Feel free to post your suggestions. Don't forget that this is not final build, there is a lot to do.
@@ -29,7 +29,7 @@ Category / Status | Feature
 `done` | No authentication
 `.` | URI
 `.` | Signed URI
-`.` | Default
+`done` | Default
 `.` | None
 `.` | HTTP Basic
 `.` | SSPI

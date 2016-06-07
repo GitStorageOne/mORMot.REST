@@ -131,7 +131,7 @@ object Form1: TForm1
       'No authentication'
       '// URI'
       '// SignedURI'
-      '// Default'
+      'Default'
       '// None'
       '// HttpBasic'
       '// SSPI')

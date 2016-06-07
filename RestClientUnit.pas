@@ -19,7 +19,7 @@ type
   lProtocol = (HTTP_Socket, HTTP_HTTPsys, WebSocketBidir_JSON, WebSocketBidir_Binary, WebSocketBidir_BinaryAES, NamedPipe);
   lAuthenticationMode = (NoAuthentication, URI, SignedURI, Default, None, HttpBasic, SSPI);
 
-  rCreateClientOptions = record
+  rClientSettings = record
     Protocol: lProtocol;
     AuthMode: lAuthenticationMode;
     HostOrIP: string;
@@ -28,59 +28,112 @@ type
     UserPassword: RawUTF8;
   end;
 
-var
-  Model: TSQLModel;
-  Client: TSQLHttpClientGeneric;
-  RestServerMethods: IRestMethods;
+  rConnectionSettings = record
+    SendTimeout: Cardinal;
+    ReceiveTimeout: Cardinal;
+    ConnectTimeout: Cardinal;
+    procedure LanNetworkPreset();
+  end;
 
-function CreateClient(Options: rCreateClientOptions): boolean;
-procedure DestroyClient();
-function ClientCreated(): boolean;
+  tRestClient = class
+  private
+    fModel: TSQLModel;
+    fClient: TSQLHttpClientGeneric;
+    fClientSettings: rClientSettings;
+    fConnectionSettings: rConnectionSettings;
+    fInitialized: boolean;
+  public
+    RestMethods: IRestMethods;
+    property Initialized: boolean read fInitialized;
+    constructor Create();
+    destructor Destroy(); override;
+    function Initialize(ClSettings: rClientSettings; ConSettings: rConnectionSettings): boolean; overload;
+    function Initialize(ClSettings: rClientSettings): boolean; overload;
+    procedure DeInitialize();
+  end;
+
+var
+  RestClient: tRestClient;
 
 implementation
 
-function CreateClient(Options: rCreateClientOptions): boolean;
+{ rConnectionSettings }
+
+procedure rConnectionSettings.LanNetworkPreset();
+begin
+  SendTimeout := 5000;
+  ReceiveTimeout := 5000;
+  ConnectTimeout := 10000;
+end;
+
+{ tRestClient }
+
+constructor tRestClient.Create();
+begin
+  fConnectionSettings.LanNetworkPreset();
+end;
+
+destructor tRestClient.Destroy();
+begin
+  DeInitialize();
+  inherited;
+end;
+
+function tRestClient.Initialize(ClSettings: rClientSettings; ConSettings: rConnectionSettings): boolean;
+begin
+  fConnectionSettings := ConSettings;
+  Result := Initialize(ClSettings);
+end;
+
+function tRestClient.Initialize(ClSettings: rClientSettings): boolean;
 begin
   Result := False;
   // Destroy current object
-  DestroyClient();
+  DeInitialize();
   // Client initialization (for better understanding, each section contain separate code, later should be refactored)
-  Model := TSQLModel.Create([], ROOT_NAME);
-  case Options.Protocol of
+  fClientSettings := ClSettings;
+  fModel := TSQLModel.Create([], ROOT_NAME);
+  case fClientSettings.Protocol of
     HTTP_Socket:
       begin
-        Client := TSQLHttpClientWinSock.Create(AnsiString(Options.HostOrIP), AnsiString(Options.Port), Model, 5000, 5000, 10000);
+        fClient := TSQLHttpClientWinSock.Create(AnsiString(fClientSettings.HostOrIP), AnsiString(fClientSettings.Port), fModel, fConnectionSettings.SendTimeout, fConnectionSettings.ReceiveTimeout,
+          fConnectionSettings.ConnectTimeout);
       end;
     HTTP_HTTPsys:
       begin
-        Client := TSQLHttpClientWinHTTP.Create(AnsiString(Options.HostOrIP), AnsiString(Options.Port), Model, 5000, 5000, 10000);
+        fClient := TSQLHttpClientWinHTTP.Create(AnsiString(fClientSettings.HostOrIP), AnsiString(fClientSettings.Port), fModel, fConnectionSettings.SendTimeout, fConnectionSettings.ReceiveTimeout,
+          fConnectionSettings.ConnectTimeout);
       end;
     WebSocketBidir_JSON:
       begin
-        Client := TSQLHttpClientWebsockets.Create(AnsiString(Options.HostOrIP), AnsiString(Options.Port), Model, 5000, 5000, 10000);
-        (Client as TSQLHttpClientWebsockets).WebSocketsUpgrade('', True);
+        fClient := TSQLHttpClientWebsockets.Create(AnsiString(fClientSettings.HostOrIP), AnsiString(fClientSettings.Port), fModel, fConnectionSettings.SendTimeout, fConnectionSettings.ReceiveTimeout,
+          fConnectionSettings.ConnectTimeout);
+        (fClient as TSQLHttpClientWebsockets).WebSocketsUpgrade('', True);
       end;
     WebSocketBidir_Binary:
       begin
-        Client := TSQLHttpClientWebsockets.Create(AnsiString(Options.HostOrIP), AnsiString(Options.Port), Model, 5000, 5000, 10000);
-        (Client as TSQLHttpClientWebsockets).WebSocketsUpgrade('', False);
+        fClient := TSQLHttpClientWebsockets.Create(AnsiString(fClientSettings.HostOrIP), AnsiString(fClientSettings.Port), fModel, fConnectionSettings.SendTimeout, fConnectionSettings.ReceiveTimeout,
+          fConnectionSettings.ConnectTimeout);
+        (fClient as TSQLHttpClientWebsockets).WebSocketsUpgrade('', False);
       end;
     WebSocketBidir_BinaryAES:
       begin
-        Client := TSQLHttpClientWebsockets.Create(AnsiString(Options.HostOrIP), AnsiString(Options.Port), Model, 5000, 5000, 10000);
-        (Client as TSQLHttpClientWebsockets).WebSocketsUpgrade('2141D32ADAD54D9A9DB56000CC9A4A70', False);
+        fClient := TSQLHttpClientWebsockets.Create(AnsiString(fClientSettings.HostOrIP), AnsiString(fClientSettings.Port), fModel, fConnectionSettings.SendTimeout, fConnectionSettings.ReceiveTimeout,
+          fConnectionSettings.ConnectTimeout);
+        (fClient as TSQLHttpClientWebsockets).WebSocketsUpgrade('2141D32ADAD54D9A9DB56000CC9A4A70', False);
       end;
-    // NamedPipe:
-    // begin
-    //
-    // end;
+    {
+      NamedPipe:
+      begin
+      end;
+    }
   else
     begin
-      DestroyClient();
+      DeInitialize();
       raise Exception.Create('Selected protocol not available in this build.');
     end;
   end;
-  case Options.AuthMode of
+  case fClientSettings.AuthMode of
     // NoAuthentication
     NoAuthentication:
       begin
@@ -89,76 +142,73 @@ begin
     // TSQLRestServerAuthenticationURI
     URI:
       begin
-        // Client.SetUser(Options.UserLogin, Options.UserPassword);
-        TSQLRestServerAuthenticationURI.ClientSetUser(Client, Options.UserLogin, Options.UserPassword);
+        // fClient.SetUser(Options.UserLogin, Options.UserPassword);
+        TSQLRestServerAuthenticationURI.ClientSetUser(fClient, fClientSettings.UserLogin, fClientSettings.UserPassword);
       end;
-{$REGION 'Other Auth modes UNDER DEVELOPMENT'}
-    // // TSQLRestServerAuthenticationSignedURI
-    // SignedURI:
-    // begin
-    // Model := TSQLModel.Create([], ROOT_NAME);
-    // Client := TSQLHttpClient.Create(AnsiString(Options.HostOrIP), AnsiString(Options.Port), Model);
-    // TSQLRestServerAuthenticationSignedURI.ClientSetUser(Client, Options.UserLogin, Options.UserPassword);
-    // end;
-    // // TSQLRestServerAuthenticationDefault
-    // Default:
-    // begin
-    // Model := TSQLModel.Create([], ROOT_NAME);
-    // Client := TSQLHttpClient.Create(AnsiString(Options.HostOrIP), AnsiString(Options.Port), Model);
-    // Client.SetUser(Options.UserLogin, Options.UserPassword);
-    // end;
-    // // TSQLRestServerAuthenticationNone
-    // None:
-    // begin
-    // Model := TSQLModel.Create([], ROOT_NAME);
-    // Client := TSQLHttpClient.Create(AnsiString(Options.HostOrIP), AnsiString(Options.Port), Model);
-    // TSQLRestServerAuthenticationNone.ClientSetUser(Client, Options.UserLogin, Options.UserPassword);
-    // end;
-    // // TSQLRestServerAuthenticationHttpBasic
-    // HttpBasic:
-    // begin
-    // Model := TSQLModel.Create([], ROOT_NAME);
-    // Client := TSQLHttpClient.Create(AnsiString(Options.HostOrIP), AnsiString(Options.Port), Model);
-    // TSQLRestServerAuthenticationHttpBasic.ClientSetUser(Client, Options.UserLogin, Options.UserPassword);
-    // end;
-    // // TSQLRestServerAuthenticationSSPI
-    // SSPI:
-    // begin
-    // Model := TSQLModel.Create([], ROOT_NAME);
-    // Client := TSQLHttpClient.Create(AnsiString(Options.HostOrIP), AnsiString(Options.Port), Model);
-    // TSQLRestServerAuthenticationSSPI.ClientSetUser(Client, Options.UserLogin, Options.UserPassword);
-    // end;
-{$ENDREGION}
+    {
+      // TSQLRestServerAuthenticationSignedURI
+      SignedURI:
+      begin
+      end;
+    }
+    // TSQLRestServerAuthenticationDefault
+    Default:
+      begin
+        fClient.SetUser(fClientSettings.UserLogin, fClientSettings.UserPassword);
+      end;
+    // TSQLRestServerAuthenticationNone
+    None:
+      begin
+        TSQLRestServerAuthenticationNone.ClientSetUser(fClient, fClientSettings.UserLogin, fClientSettings.UserPassword);
+      end;
+    {
+      // TSQLRestServerAuthenticationHttpBasic
+      HttpBasic:
+      begin
+      end;
+    }
+    {
+      // TSQLRestServerAuthenticationSSPI
+      SSPI:
+      begin
+      end;
+    }
   else
     begin
-      DestroyClient();
+      DeInitialize();
       raise Exception.Create('Selected Authentication mode not available in this build.');
     end;
   end;
   // Preparing
-  if not Client.ServerTimeStampSynchronize() then
+  if not fClient.ServerTimeStampSynchronize() then
     begin
-      ShowMessage(UTF8ToString(Client.LastErrorMessage));
+      ShowMessage(UTF8ToString(fClient.LastErrorMessage));
       exit;
     end;
   // Service initialization
-  Client.ServiceDefine([IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
+  fClient.ServiceDefine([IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
   // Result := Client.Services['RestMethods'].Get(RestServerMethods);
-  Result := Client.Services.Resolve(IRestMethods, RestServerMethods); // same result, but no chance to make mistake with service name
+  Result := fClient.Services.Resolve(IRestMethods, RestMethods); // same result, but no chance to make mistake with service name
+  fInitialized := Result;
 end;
 
-procedure DestroyClient();
+procedure tRestClient.DeInitialize();
 begin
-  if Assigned(Client) then
-    FreeAndNil(Client);
-  if Assigned(Model) then
-    FreeAndNil(Model);
-  RestServerMethods := nil;
+  if Assigned(fClient) then
+    FreeAndNil(fClient);
+  if Assigned(fModel) then
+    FreeAndNil(fModel);
+  RestMethods := nil;
+  fInitialized := False;
 end;
 
-function ClientCreated(): boolean;
-begin
-  Result := Assigned(Client);
-end;
+initialization
+
+RestClient := tRestClient.Create();
+
+finalization
+
+if Assigned(RestClient) then
+  FreeAndNil(RestClient);
 
 end.
