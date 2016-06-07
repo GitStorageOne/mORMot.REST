@@ -31,7 +31,7 @@ Category / Status | Feature
 `.` | Signed URI
 `done` | Default
 `done` | None
-`.` | HTTP Basic
+`done` | HTTP Basic
 `.` | SSPI
 **Authorization** |
 `.` | Allow all to execute any method

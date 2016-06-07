@@ -41,21 +41,6 @@ object Form1: TForm1
     Height = 13
     Caption = 'Protocol:'
   end
-  object LabelAuthNotAvailable: TLabel
-    Left = 448
-    Top = 38
-    Width = 164
-    Height = 13
-    Caption = 'not available with current Protocol'
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clRed
-    Font.Height = -11
-    Font.Name = 'Tahoma'
-    Font.Style = []
-    ParentFont = False
-    Visible = False
-    StyleElements = [seClient, seBorder]
-  end
   object EditPort: TEdit
     Left = 896
     Top = 25
@@ -133,7 +118,7 @@ object Form1: TForm1
       '// SignedURI'
       'Default'
       'None'
-      '// HttpBasic'
+      'HttpBasic'
       '// SSPI')
   end
   object ButtonShowAuthorizationInfo: TButton

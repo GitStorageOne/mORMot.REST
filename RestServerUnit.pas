@@ -88,14 +88,14 @@ begin
     NoAuthentication:
       begin
         fModel := TSQLModel.Create([], ROOT_NAME);
-        fRestServer := TSQLRestServerFullMemory.Create(fModel, False);
+        fRestServer := TSQLRestServerFullMemory.Create(fModel, false);
         fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
       end;
     // TSQLRestServerAuthenticationURI
     URI:
       begin
         fModel := TSQLModel.Create([], ROOT_NAME);
-        fRestServer := TSQLRestServerFullMemory.Create(fModel, False { make AuthenticationSchemesCount = 0 } );
+        fRestServer := TSQLRestServerFullMemory.Create(fModel, false { make AuthenticationSchemesCount = 0 } );
         ServiceFactoryServer := fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
         fRestServer.AuthenticationRegister(TSQLRestServerAuthenticationURI); // register single authentication mode
         ApplyAuthenticationRules(ServiceFactoryServer);
@@ -110,7 +110,7 @@ begin
     Default:
       begin
         fModel := TSQLModel.Create([], ROOT_NAME);
-        fRestServer := TSQLRestServerFullMemory.Create(fModel, False { make AuthenticationSchemesCount = 0 } );
+        fRestServer := TSQLRestServerFullMemory.Create(fModel, false { make AuthenticationSchemesCount = 0 } );
         ServiceFactoryServer := fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
         fRestServer.AuthenticationRegister(TSQLRestServerAuthenticationDefault); // register single authentication mode
         ApplyAuthenticationRules(ServiceFactoryServer);
@@ -119,17 +119,20 @@ begin
     None:
       begin
         fModel := TSQLModel.Create([], ROOT_NAME);
-        fRestServer := TSQLRestServerFullMemory.Create(fModel, False { make AuthenticationSchemesCount = 0 } );
+        fRestServer := TSQLRestServerFullMemory.Create(fModel, false { make AuthenticationSchemesCount = 0 } );
         ServiceFactoryServer := fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
         fRestServer.AuthenticationRegister(TSQLRestServerAuthenticationNone); // register single authentication mode
         ApplyAuthenticationRules(ServiceFactoryServer);
       end;
-    {
-      // TSQLRestServerAuthenticationHttpBasic
-      HttpBasic:
+    // TSQLRestServerAuthenticationHttpBasic
+    HttpBasic:
       begin
+        fModel := TSQLModel.Create([], ROOT_NAME);
+        fRestServer := TSQLRestServerFullMemory.Create(fModel, false { make AuthenticationSchemesCount = 0 } );
+        ServiceFactoryServer := fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
+        fRestServer.AuthenticationRegister(TSQLRestServerAuthenticationHttpBasic); // register single authentication mode
+        ApplyAuthenticationRules(ServiceFactoryServer);
       end;
-    }
     {
       // TSQLRestServerAuthenticationSSPI
       SSPI:
@@ -203,7 +206,7 @@ begin
     FreeAndNil(fRestServer);
   if Assigned(fModel) then
     FreeAndNil(fModel);
-  fInitialized := False;
+  fInitialized := false;
 end;
 
 initialization

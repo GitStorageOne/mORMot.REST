@@ -51,7 +51,6 @@ type
     ButtonMethSendMultipleCustomRecords: TButton;
     LabelProtocol: TLabel;
     ComboBoxProtocol: TComboBox;
-    LabelAuthNotAvailable: TLabel;
     EditUserLogin: TEdit;
     EditUserPassword: TEdit;
     Label1: TLabel;

@@ -41,7 +41,6 @@ type
     CheckBoxDisableLog: TCheckBox;
     LabelProtocol: TLabel;
     ComboBoxProtocol: TComboBox;
-    LabelAuthNotAvailable: TLabel;
     ListViewMethodGroups: TListView;
     GroupBoxMethodGroupConfiguration: TGroupBox;
     RadioGroupAuthorizationPolicy: TRadioGroup;
