@@ -1,4 +1,4 @@
-﻿# mORMot.REST
+# mORMot.REST
 Testing mORMot REST capabilities.  
 It's my first meeting with mORMot, so, something may be unoptimized or implemented wrong.  
 Feel free to post your suggestions. Don't forget that this is not final build, there is a lot to do.
@@ -15,17 +15,17 @@ Category / Status | Feature
 --- | ---
 **mORMot REST architecture** |
 `done` | Services via interfaces
-**Multiple protocol usage** |
+**Protocol usage** |
 `done` |  HTTP (socket)
 `done` |  HTTP (http.sys)
 `done` |  WebSocket (bidirectional, JSON)
 `done` |  WebSocket (bidirectional, Binary)
 `done` |  WebSocket (bidirectional, Binary + AES)
 `.` |  Named pipe
-**Multiple method interfaces** |
+**Method interfaces** |
 `done` | IRestMethods (no session support).
 `.` | IRestMethodsEx (session support, callback support).
-**Multiple authentication schemes** |
+**Authentication schemes** |
 `done` | No authentication
 `.` | URI
 `.` | Signed URI
