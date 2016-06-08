@@ -45,7 +45,8 @@ Category / Status | Feature
 **Other** |
 `.` | HTTPS and certificates
 `.` | HTTP/s proxy bypass
-`.` | Improve spee while log output enabled
+`.` | Improve speed while log output enabled
+`(optional)` | Refactoring
 
 Official Synopse mORMot repository [available here][mormot-repo].  
 Official Synopse mORMot documentation [available here][mormot-docs].
