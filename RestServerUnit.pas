@@ -7,6 +7,7 @@ uses
   System.SysUtils,
   System.Classes,
   System.StrUtils,
+  System.Generics.Collections,
   Vcl.Dialogs,
   // mORMot
   mORMot,
@@ -20,12 +21,44 @@ uses
 
 type
   lProtocol = (HTTP_Socket, HTTPsys, WebSocketBidir_JSON, WebSocketBidir_Binary, WebSocketBidir_BinaryAES, NamedPipe);
-  lAuthenticationMode = (NoAuthentication, URI, SignedURI, Default, None, HttpBasic, SSPI);
+  lAuthenticationMode = (NoAuthentication, Default, None, HttpBasic, SSPI);
+  lAuthorizationPolicy = (AllowAll, DenyAll, FollowGroupsSettings);
 
-  rServerSettings = record
+  rAuthGroup = record
+    Name: RawUTF8;
+    SessionTimeout: integer;
+    SQLAccessRights: TSQLAccessRights;
+  end;
+
+  rAuthUser = record
+    LogonName: RawUTF8;
+    DisplayName: RawUTF8;
+    PasswordPlain: RawUTF8;
+    PasswordHashHexa: RawUTF8;
+    Group: RawUTF8;
+  end;
+
+  rMethodAuthorizationSettings = record
+    MethodName: RawUTF8;
+    AllowedGroups: array of RawUTF8;
+    DeniedGroups: array of RawUTF8;
+  end;
+
+  TRestServerSettings = class
+  private
+    fGroupList: TList<rAuthGroup>;
+    fUserList: TList<rAuthUser>;
+    fMethodAuthorizationSettings: TList<rMethodAuthorizationSettings>;
+  public
     Protocol: lProtocol;
-    AuthMode: lAuthenticationMode;
     Port: string;
+    AuthenticationMode: lAuthenticationMode;
+    AuthorizationPolicy: lAuthorizationPolicy;
+    constructor Create();
+    destructor Destroy(); override;
+    function AddGroup(AuthGroup: rAuthGroup): boolean;
+    function AddUser(AuthUser: rAuthUser): boolean;
+    function AddMethodAuthorizationSettings(MethodAuthorizationSettings: rMethodAuthorizationSettings): boolean;
   end;
 
   tRestServer = class
@@ -33,14 +66,14 @@ type
     fModel: TSQLModel;
     fRestServer: TSQLRestServer;
     fHTTPServer: TSQLHttpServer;
-    fServerSettings: rServerSettings;
+    fServerSettings: TRestServerSettings;
     fInitialized: boolean;
-    procedure ApplyAuthenticationRules(ServiceFactoryServer: TServiceFactoryServer);
+    procedure ApplyAuthorizationRules(ServiceFactoryServer: TServiceFactoryServer; RestServerSettings: TRestServerSettings);
   public
     property Initialized: boolean read fInitialized;
     constructor Create();
     destructor Destroy(); override;
-    function Initialize(SrvSettings: rServerSettings): boolean;
+    function Initialize(SrvSettings: TRestServerSettings): boolean;
     function DeInitialize(): boolean;
   end;
 
@@ -48,6 +81,49 @@ var
   RestServer: tRestServer;
 
 implementation
+
+{ TServerSettings }
+
+constructor TRestServerSettings.Create();
+begin
+  AuthenticationMode := lAuthenticationMode.NoAuthentication;
+  AuthorizationPolicy := lAuthorizationPolicy.AllowAll;
+  fGroupList := TList<rAuthGroup>.Create();
+  fUserList := TList<rAuthUser>.Create();
+  fMethodAuthorizationSettings := TList<rMethodAuthorizationSettings>.Create();
+end;
+
+destructor TRestServerSettings.Destroy();
+begin
+  fGroupList.Free;
+  fUserList.Free;
+  fMethodAuthorizationSettings.Free;
+  inherited;
+end;
+
+function TRestServerSettings.AddGroup(AuthGroup: rAuthGroup): boolean;
+begin
+  Result := True;
+  // some checks must be implemented here
+  // ...
+  fGroupList.Add(AuthGroup);
+end;
+
+function TRestServerSettings.AddUser(AuthUser: rAuthUser): boolean;
+begin
+  Result := True;
+  // some checks must be implemented here
+  // ...
+  fUserList.Add(AuthUser);
+end;
+
+function TRestServerSettings.AddMethodAuthorizationSettings(MethodAuthorizationSettings: rMethodAuthorizationSettings): boolean;
+begin
+  Result := True;
+  // some checks must be implemented here
+  // ...
+  fMethodAuthorizationSettings.Add(MethodAuthorizationSettings);
+end;
 
 { tRestServer }
 
@@ -59,21 +135,102 @@ end;
 destructor tRestServer.Destroy();
 begin
   DeInitialize();
+  fServerSettings.Free();
   inherited;
 end;
 
-procedure tRestServer.ApplyAuthenticationRules(ServiceFactoryServer: TServiceFactoryServer);
+procedure tRestServer.ApplyAuthorizationRules(ServiceFactoryServer: TServiceFactoryServer; RestServerSettings: TRestServerSettings);
 var
-  ID: TID;
-  GROUP: TSQLAuthGroup;
-begin // TSQLAuthUser, TSQLAuthGroup
-  ID := fRestServer.MainFieldID(TSQLAuthGroup, 'User');
-  GROUP := TSQLAuthGroup.Create(fRestServer, ID);
-  GROUP.Free;
-  ServiceFactoryServer.AllowAll();
+  User: TSQLAuthUser;
+  Group: TSQLAuthGroup;
+  GroupID: TID;
+  i, j: integer;
+  AuthGroup: rAuthGroup;
+  AuthUser: rAuthUser;
+  MethodAuthorizationSettings: rMethodAuthorizationSettings;
+  // IDs: TIDDynArray;
+begin
+  // ID := fRestServer.MainFieldID(TSQLAuthGroup, 'User');
+
+  { TSQLAuthGroup }
+  // Clear default groups
+  fRestServer.Delete(TSQLAuthGroup, '');
+  for i := 0 to RestServerSettings.fGroupList.Count - 1 do
+    begin
+      AuthGroup := RestServerSettings.fGroupList.Items[i];
+      Group := TSQLAuthGroup.Create();
+      Group.Ident := AuthGroup.Name;
+      Group.SQLAccessRights := AuthGroup.SQLAccessRights;
+      Group.SessionTimeout := AuthGroup.SessionTimeout;
+      // Save object to ORM
+      fRestServer.Add(Group, True);
+      // Cleanup
+      Group.Free;
+    end;
+
+  { TSQLAuthUser }
+  // Clear default users
+  fRestServer.Delete(TSQLAuthUser, '');
+  for i := 0 to RestServerSettings.fUserList.Count - 1 do
+    begin
+      AuthUser := RestServerSettings.fUserList.Items[i];
+      User := TSQLAuthUser.Create();
+      User.DisplayName := AuthUser.DisplayName;
+      User.LogonName := AuthUser.LogonName;
+      User.PasswordPlain := AuthUser.PasswordPlain;
+      if AuthUser.PasswordHashHexa <> '' then
+        User.PasswordHashHexa := AuthUser.PasswordHashHexa;
+      if AuthUser.Group <> '' then
+        begin
+          GroupID := fRestServer.MainFieldID(TSQLAuthGroup, AuthUser.Group);
+          User.GroupRights := pointer(GroupID);
+        end;
+      // Save object to ORM
+      fRestServer.Add(User, True);
+      // Cleanup
+      User.Free;
+    end;
+
+  {
+    // DEBUG
+    fRestServer.MainFieldIDs(TSQLAuthGroup, ['Administrators', 'Users'], IDs);
+    if Length(IDs) = 0 then
+    ShowMessage('why IDs = []? (((');
+    // WHY IDs empty?
+    Group := TSQLAuthGroup.CreateAndFillPrepare(fRestServer, '');
+    try
+    while Group.FillOne do
+    ShowMessage(Group.Ident);
+    finally
+    Group.Free;
+    end;
+    // DEBUG
+  }
+
+  // Apply Authorization Rules
+  case RestServerSettings.AuthorizationPolicy of
+    AllowAll:
+      ServiceFactoryServer.AllowAll();
+    DenyAll:
+      ServiceFactoryServer.DenyAll();
+    FollowGroupsSettings:
+      begin
+        ServiceFactoryServer.DenyAll();
+        for i := 0 to RestServerSettings.fMethodAuthorizationSettings.Count - 1 do
+          begin
+            MethodAuthorizationSettings := RestServerSettings.fMethodAuthorizationSettings.Items[i];
+            // ServiceFactoryServer.AllowByName([MethodAuthorizationSettings.MethodName], MethodAuthorizationSettings.AllowedGroups); // not work for some reason :(
+            // ServiceFactoryServer.DenyByName([MethodAuthorizationSettings.MethodName], MethodAuthorizationSettings.DeniedGroups);
+            for j := 0 to Length(MethodAuthorizationSettings.AllowedGroups) - 1 do
+              ServiceFactoryServer.AllowByName([MethodAuthorizationSettings.MethodName], MethodAuthorizationSettings.AllowedGroups[j]);
+            for j := 0 to Length(MethodAuthorizationSettings.DeniedGroups)  - 1 do
+              ServiceFactoryServer.DenyByName([MethodAuthorizationSettings.MethodName], MethodAuthorizationSettings.DeniedGroups[j]);
+          end;
+      end;
+  end;
 end;
 
-function tRestServer.Initialize(SrvSettings: rServerSettings): boolean;
+function tRestServer.Initialize(SrvSettings: TRestServerSettings): boolean;
 var
   ServiceFactoryServer: TServiceFactoryServer;
   { WebSocketServerRest: TWebSocketServerRest; }
@@ -83,8 +240,9 @@ begin
   if DeInitialize() then
     try
       // Server initialization (!!! for better understanding, each section contain separate code, later should be refactored)
+      fServerSettings.Free;
       fServerSettings := SrvSettings;
-      case fServerSettings.AuthMode of
+      case fServerSettings.AuthenticationMode of
         // NoAuthentication
         NoAuthentication:
           begin
@@ -92,21 +250,6 @@ begin
             fRestServer := TSQLRestServerFullMemory.Create(fModel, false);
             fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
           end;
-        // TSQLRestServerAuthenticationURI
-        URI:
-          begin
-            fModel := TSQLModel.Create([], ROOT_NAME);
-            fRestServer := TSQLRestServerFullMemory.Create(fModel, false { make AuthenticationSchemesCount = 0 } );
-            ServiceFactoryServer := fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
-            fRestServer.AuthenticationRegister(TSQLRestServerAuthenticationURI); // register single authentication mode
-            ApplyAuthenticationRules(ServiceFactoryServer);
-          end;
-        {
-          // TSQLRestServerAuthenticationSignedURI
-          SignedURI:
-          begin
-          end;
-        }
         // TSQLRestServerAuthenticationDefault
         Default:
           begin
@@ -114,7 +257,7 @@ begin
             fRestServer := TSQLRestServerFullMemory.Create(fModel, false { make AuthenticationSchemesCount = 0 } );
             ServiceFactoryServer := fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
             fRestServer.AuthenticationRegister(TSQLRestServerAuthenticationDefault); // register single authentication mode
-            ApplyAuthenticationRules(ServiceFactoryServer);
+            ApplyAuthorizationRules(ServiceFactoryServer, fServerSettings);
           end;
         // TSQLRestServerAuthenticationNone
         None:
@@ -123,7 +266,7 @@ begin
             fRestServer := TSQLRestServerFullMemory.Create(fModel, false { make AuthenticationSchemesCount = 0 } );
             ServiceFactoryServer := fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
             fRestServer.AuthenticationRegister(TSQLRestServerAuthenticationNone); // register single authentication mode
-            ApplyAuthenticationRules(ServiceFactoryServer);
+            ApplyAuthorizationRules(ServiceFactoryServer, fServerSettings);
           end;
         // TSQLRestServerAuthenticationHttpBasic
         HttpBasic:
@@ -132,7 +275,7 @@ begin
             fRestServer := TSQLRestServerFullMemory.Create(fModel, false { make AuthenticationSchemesCount = 0 } );
             ServiceFactoryServer := fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
             fRestServer.AuthenticationRegister(TSQLRestServerAuthenticationHttpBasic); // register single authentication mode
-            ApplyAuthenticationRules(ServiceFactoryServer);
+            ApplyAuthorizationRules(ServiceFactoryServer, fServerSettings);
           end;
         {
           // TSQLRestServerAuthenticationSSPI

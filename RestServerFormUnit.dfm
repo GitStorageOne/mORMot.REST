@@ -1,10 +1,12 @@
 object Form1: TForm1
   Left = 0
   Top = 0
-  Caption = 'SRV.mORMot REST HTTP test'
-  ClientHeight = 667
-  ClientWidth = 1083
+  Caption = 'SRV.mORMot REST test'
+  ClientHeight = 661
+  ClientWidth = 1084
   Color = clBtnFace
+  Constraints.MinHeight = 325
+  Constraints.MinWidth = 1100
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -15,17 +17,18 @@ object Form1: TForm1
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   DesignSize = (
-    1083
-    667)
+    1084
+    661)
   PixelsPerInch = 96
   TextHeight = 13
   object LabelPortCap: TLabel
-    Left = 866
+    Left = 867
     Top = 28
     Width = 24
     Height = 13
     Anchors = [akTop, akRight]
     Caption = 'Port:'
+    ExplicitLeft = 866
   end
   object LabelAuthenticationMode: TLabel
     Left = 37
@@ -42,7 +45,7 @@ object Form1: TForm1
     Caption = 'Protocol:'
   end
   object EditPort: TEdit
-    Left = 896
+    Left = 897
     Top = 25
     Width = 60
     Height = 21
@@ -51,7 +54,7 @@ object Form1: TForm1
     Text = '777'
   end
   object ButtonStartStop: TButton
-    Left = 968
+    Left = 969
     Top = 19
     Width = 105
     Height = 33
@@ -68,9 +71,9 @@ object Form1: TForm1
   end
   object MemoLog: TMemo
     Left = 8
-    Top = 232
-    Width = 1065
-    Height = 399
+    Top = 255
+    Width = 1066
+    Height = 370
     Anchors = [akLeft, akTop, akRight, akBottom]
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -83,7 +86,7 @@ object Form1: TForm1
   end
   object ButtonCLS: TButton
     Left = 10
-    Top = 637
+    Top = 631
     Width = 38
     Height = 22
     Anchors = [akLeft, akBottom]
@@ -93,7 +96,7 @@ object Form1: TForm1
   end
   object CheckBoxAutoScroll: TCheckBox
     Left = 57
-    Top = 639
+    Top = 633
     Width = 69
     Height = 17
     Anchors = [akLeft, akBottom]
@@ -108,14 +111,12 @@ object Form1: TForm1
     Width = 276
     Height = 21
     Style = csDropDownList
-    ItemIndex = 0
+    ItemIndex = 1
     TabOrder = 5
-    Text = 'No authentication'
+    Text = 'Default'
     OnChange = ComboBoxAuthenticationChange
     Items.Strings = (
       'No authentication'
-      '// URI'
-      '// SignedURI'
       'Default'
       'None'
       'HttpBasic'
@@ -132,7 +133,7 @@ object Form1: TForm1
   end
   object CheckBoxDisableLog: TCheckBox
     Left = 133
-    Top = 639
+    Top = 633
     Width = 203
     Height = 17
     Anchors = [akLeft, akBottom]
@@ -162,15 +163,14 @@ object Form1: TForm1
     Left = 164
     Top = 62
     Width = 520
-    Height = 164
+    Height = 187
     Caption = 'Method / Group configuration'
-    Enabled = False
     TabOrder = 9
     object ListViewMethodGroups: TListView
       Left = 10
       Top = 16
       Width = 503
-      Height = 110
+      Height = 133
       Columns = <
         item
           Caption = ' Method'
@@ -184,50 +184,65 @@ object Form1: TForm1
           Caption = ' Deny group by name'
           Width = 160
         end>
+      Groups = <
+        item
+          Header = 'IRestMethods'
+          GroupID = 0
+          State = [lgsNormal]
+          HeaderAlign = taLeftJustify
+          FooterAlign = taLeftJustify
+          Subtitle = 'InstanceImplementation = sicSingle'
+          TitleImage = -1
+        end>
       Items.ItemData = {
-        05D30100000500000000000000FFFFFFFFFFFFFFFF01000000FFFFFFFF000000
+        050C0200000500000000000000FFFFFFFFFFFFFFFF0200000000000000000000
         000A480065006C006C006F0057006F0072006C00640014550073006500720073
-        002C00410064006D0069006E006900730074007200610074006F007200730058
-        DFC21F00000000FFFFFFFFFFFFFFFF01000000FFFFFFFF000000000353007500
-        6D0014550073006500720073002C00410064006D0069006E0069007300740072
-        00610074006F007200730088E1C21F00000000FFFFFFFFFFFFFFFF01000000FF
-        FFFFFF000000000F47006500740043007500730074006F006D00520065006300
+        002C00410064006D0069006E006900730074007200610074006F007200730040
+        EA6E1B0B53006F006D0065006F006E00650045006C0073006500E8DC6E1B0000
+        0000FFFFFFFFFFFFFFFF02000000000000000000000003530075006D00145500
+        73006500720073002C00410064006D0069006E00690073007400720061007400
+        6F007200730050C36E1B0080CC6E1B00000000FFFFFFFFFFFFFFFF0200000000
+        000000000000000F47006500740043007500730074006F006D00520065006300
         6F00720064000E410064006D0069006E006900730074007200610074006F0072
-        007300F8E1C21F00000000FFFFFFFFFFFFFFFF01000000FFFFFFFF0000000010
-        530065006E00640043007500730074006F006D005200650063006F0072006400
-        0E410064006D0069006E006900730074007200610074006F007200730030E2C2
-        1F00000000FFFFFFFFFFFFFFFF01000000FFFFFFFF0000000019530065006E00
-        64004D0075006C007400690070006C00650043007500730074006F006D005200
-        650063006F007200640073000E410064006D0069006E00690073007400720061
-        0074006F0072007300C0E1C21FFFFFFFFFFFFFFFFFFFFF}
+        00730038A66E1B0050DF6E1B00000000FFFFFFFFFFFFFFFF0200000000000000
+        0000000010530065006E00640043007500730074006F006D005200650063006F
+        00720064000E410064006D0069006E006900730074007200610074006F007200
+        730068CB6E1B0048B06E1B00000000FFFFFFFFFFFFFFFF020000000000000000
+        00000019530065006E0064004D0075006C007400690070006C00650043007500
+        730074006F006D005200650063006F007200640073000E410064006D0069006E
+        006900730074007200610074006F0072007300C0D86E1B0018D16E1BFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
+      GroupView = True
       ReadOnly = True
       RowSelect = True
       TabOrder = 0
       ViewStyle = vsReport
+      OnSelectItem = ListViewMethodGroupsSelectItem
     end
     object ButtonSaveRoleConfiguration: TButton
       Left = 463
-      Top = 130
+      Top = 155
       Width = 50
       Height = 25
       Caption = 'Save'
       TabOrder = 1
+      OnClick = ButtonSaveRoleConfigurationClick
     end
     object EditAllowGroupNames: TEdit
       Left = 136
-      Top = 132
+      Top = 157
       Width = 160
       Height = 21
       TabOrder = 2
-      TextHint = 'Allow group name'
+      TextHint = 'Allow group names  (sep by ",")'
     end
     object EditDenyAllowGroupNames: TEdit
       Left = 298
-      Top = 132
+      Top = 157
       Width = 159
       Height = 21
       TabOrder = 3
-      TextHint = 'Deny group name'
+      TextHint = 'Deny group names (sep by ",")'
     end
   end
   object RadioGroupAuthorizationPolicy: TRadioGroup
@@ -236,73 +251,79 @@ object Form1: TForm1
     Width = 150
     Height = 73
     Caption = 'Authorization policy'
-    Enabled = False
-    ItemIndex = 0
+    ItemIndex = 2
     Items.Strings = (
       'Allow all'
       'Deny all'
       'Follow groups settings')
     TabOrder = 10
+    OnClick = RadioGroupAuthorizationPolicyClick
   end
   object GroupBoxUsers: TGroupBox
     Left = 690
     Top = 62
     Width = 383
-    Height = 164
+    Height = 187
     Caption = 'Users'
-    Enabled = False
     TabOrder = 11
     object ListViewUsers: TListView
       Left = 9
       Top = 16
       Width = 365
-      Height = 110
+      Height = 133
       Columns = <
         item
           Caption = ' User'
-          Width = 160
+          Width = 110
+        end
+        item
+          Caption = ' Password'
+          Width = 110
         end
         item
           Caption = ' Group'
-          Width = 160
+          Width = 110
         end>
       Items.ItemData = {
-        05780000000200000000000000FFFFFFFFFFFFFFFF01000000FFFFFFFF000000
-        000441006C00650078000555007300650072007300704BC41F00000000FFFFFF
-        FFFFFFFFFF01000000FFFFFFFF00000000044A006F0068006E000E410064006D
-        0069006E006900730074007200610074006F0072007300E04BC41FFFFFFFFF}
+        05960000000200000000000000FFFFFFFFFFFFFFFF02000000FFFFFFFF000000
+        0006470065006F0072006700650003310032003300B8EB761B0E410064006D00
+        69006E006900730074007200610074006F007200730058EE761B00000000FFFF
+        FFFFFFFFFFFF02000000FFFFFFFF000000000441006C00650078000333003200
+        310090EE761B0555007300650072007300C8EE761BFFFFFFFFFFFFFFFF}
       ReadOnly = True
       RowSelect = True
       TabOrder = 0
       ViewStyle = vsReport
+      OnSelectItem = ListViewUsersSelectItem
     end
     object EditUserGroup: TEdit
-      Left = 192
-      Top = 132
-      Width = 126
+      Left = 235
+      Top = 157
+      Width = 83
       Height = 21
       TabOrder = 1
       TextHint = 'Group'
     end
     object ButtonSaveUsers: TButton
       Left = 324
-      Top = 130
+      Top = 155
       Width = 50
       Height = 25
       Caption = 'Save'
       TabOrder = 2
+      OnClick = ButtonSaveUsersClick
     end
     object EditUserName: TEdit
-      Left = 64
-      Top = 132
-      Width = 126
+      Left = 65
+      Top = 157
+      Width = 83
       Height = 21
       TabOrder = 3
       TextHint = 'User'
     end
     object ButtonAddUser: TButton
       Left = 9
-      Top = 130
+      Top = 155
       Width = 24
       Height = 25
       Caption = '+'
@@ -310,16 +331,24 @@ object Form1: TForm1
     end
     object ButtonDeleteUser: TButton
       Left = 34
-      Top = 130
+      Top = 155
       Width = 24
       Height = 25
       Caption = '-'
       TabOrder = 5
     end
+    object EditUserPassword: TEdit
+      Left = 150
+      Top = 157
+      Width = 83
+      Height = 21
+      TabOrder = 6
+      TextHint = 'Password'
+    end
   end
   object TimerRefreshLogMemo: TTimer
     OnTimer = TimerRefreshLogMemoTimer
     Left = 56
-    Top = 240
+    Top = 264
   end
 end

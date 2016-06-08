@@ -54,6 +54,7 @@ type
     EditUserName: TEdit;
     ButtonAddUser: TButton;
     ButtonDeleteUser: TButton;
+    EditUserPassword: TEdit;
     procedure ButtonStartStopClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure ButtonCLSClick(Sender: TObject);
@@ -63,10 +64,17 @@ type
     procedure ButtonShowAuthorizationInfoClick(Sender: TObject);
     procedure CheckBoxDisableLogClick(Sender: TObject);
     procedure ComboBoxProtocolChange(Sender: TObject);
+    procedure ListViewMethodGroupsSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
+    procedure ListViewUsersSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
+    procedure ButtonSaveRoleConfigurationClick(Sender: TObject);
+    procedure ButtonSaveUsersClick(Sender: TObject);
+    procedure RadioGroupAuthorizationPolicyClick(Sender: TObject);
   private
-    function LogEvent(Sender: TTextWriter; Level: TSynLogInfo; const Text: RawUTF8): boolean;
+    function LogEvent(Sender: TTextWriter; Level: TSynLogInfo; const Text: RawUTF8): Boolean;
     function GetAuthModeDescription(AM: lAuthenticationMode): string;
+    function FillMethodAuthorizationRulesFromUI(RestServerSettings: TRestServerSettings): Boolean;
     procedure StartStopServer(ServerAction: lServerAction = Auto);
+
   public
     { Public declarations }
   end;
@@ -83,7 +91,6 @@ var
 implementation
 
 {$R *.dfm}
-
 { TForm1 }
 
 // On Form1 create
@@ -117,11 +124,118 @@ end;
 
 { SERVER EVENTS, START / STOP }
 
+// Fill RestServerSettings object with groups, users and method authorization settings
+function TForm1.FillMethodAuthorizationRulesFromUI(RestServerSettings: TRestServerSettings): Boolean;
+var
+  i, j, l: integer;
+  AddedGroups, GroupsToAdd: TStringList;
+  AuthGroup: rAuthGroup;
+  AuthUser: rAuthUser;
+  MethodAuthorizationSettings: rMethodAuthorizationSettings;
+  SQLAccessRights: TSQLAccessRights;
+  GroupName, MethodName, UserName: string;
+begin
+  Result := True;
+  // Prepare temp objects
+  AddedGroups := TStringList.Create();
+  GroupsToAdd := TStringList.Create();
+  GroupsToAdd.LineBreak := ',';
+  GroupsToAdd.Duplicates := dupIgnore;
+  // For REST service, only one rule required = reService, will be applyed to all groups
+  SQLAccessRights.AllowRemoteExecute := [reService];
+  // Fill group names from columns "Allow" and "Deny"
+  for i := 0 to ListViewMethodGroups.Items.Count - 1 do
+    GroupsToAdd.Text := GroupsToAdd.Text + ListViewMethodGroups.Items[i].SubItems.Strings[0] + ',' + ListViewMethodGroups.Items[i].SubItems.Strings[1];
+  // Add groups
+  for i := 0 to GroupsToAdd.Count - 1 do
+    begin
+      GroupName := GroupsToAdd.Strings[i];
+      if AddedGroups.IndexOf(GroupName) = -1 then
+        begin
+          // Ok, new group here, we must add it before continue
+          AuthGroup.Name := StringToUTF8(GroupName);
+          AuthGroup.SessionTimeout := 10;
+          AuthGroup.SQLAccessRights := SQLAccessRights;
+          if RestServerSettings.AddGroup(AuthGroup) then
+            // Add group to local temp list, to avoid double processing
+            AddedGroups.Add(GroupName)
+          else
+            begin
+              Result := False;
+              ShowMessage('Group "' + GroupName + '" was not added, for some reason.');
+            end;
+        end;
+    end;
+  GroupsToAdd.Clear;
+  if Result then
+    begin
+      // Add method authorization settings
+      for i := 0 to ListViewMethodGroups.Items.Count - 1 do
+        begin
+          MethodName := ListViewMethodGroups.Items[i].Caption;
+          MethodAuthorizationSettings.MethodName := StringToUTF8(MethodName);
+          SetLength(MethodAuthorizationSettings.AllowedGroups, 0);
+          SetLength(MethodAuthorizationSettings.DeniedGroups, 0);
+          // Allowed groups
+          GroupsToAdd.Text := ListViewMethodGroups.Items[i].SubItems.Strings[0];
+          for j := 0 to GroupsToAdd.Count - 1 do
+            begin
+              GroupName := GroupsToAdd.Strings[j];
+              if AddedGroups.IndexOf(GroupName) <> -1 then
+                begin
+                  l := Length(MethodAuthorizationSettings.AllowedGroups);
+                  SetLength(MethodAuthorizationSettings.AllowedGroups, l + 1);
+                  MethodAuthorizationSettings.AllowedGroups[l] := StringToUTF8(GroupName);
+                end
+            end;
+          GroupsToAdd.Clear;
+          // Denied groups
+          GroupsToAdd.Text := ListViewMethodGroups.Items[i].SubItems.Strings[1];
+          for j := 0 to GroupsToAdd.Count - 1 do
+            begin
+              GroupName := GroupsToAdd.Strings[j];
+              if AddedGroups.IndexOf(GroupName) <> -1 then
+                begin
+                  l := Length(MethodAuthorizationSettings.DeniedGroups);
+                  SetLength(MethodAuthorizationSettings.DeniedGroups, l + 1);
+                  MethodAuthorizationSettings.DeniedGroups[l] := StringToUTF8(GroupName);
+                end
+            end;
+          if not RestServerSettings.AddMethodAuthorizationSettings(MethodAuthorizationSettings) then
+            begin
+              Result := False;
+              ShowMessage('Method authorization settings for method"' + UTF8ToString(MethodAuthorizationSettings.MethodName) + '" was not added, for some reason.');
+            end;
+        end;
+      GroupsToAdd.Clear;
+      if Result then
+        begin
+          // Add users
+          for i := 0 to ListViewUsers.Items.Count - 1 do
+            begin
+              UserName := ListViewUsers.Items[i].Caption;
+              AuthUser.LogonName := StringToUTF8(UserName);
+              AuthUser.DisplayName := AuthUser.LogonName;
+              AuthUser.PasswordPlain := StringToUTF8(ListViewUsers.Items[i].SubItems.Strings[0]);
+              AuthUser.Group := StringToUTF8(ListViewUsers.Items[i].SubItems.Strings[1]);
+              if not RestServerSettings.AddUser(AuthUser) then
+                begin
+                  Result := False;
+                  ShowMessage('User "' + UserName + '" was not added, for some reason.');
+                end;
+            end;
+        end;
+    end;
+  // Cleanup
+  AddedGroups.Free;
+  GroupsToAdd.Free;
+end;
+
 // Depends on the server status, start or stop server (create or destroy objects)
 procedure TForm1.StartStopServer(ServerAction: lServerAction = Auto);
 var
-  pServerCreated: boolean;
-  ServerSettings: rServerSettings;
+  pServerCreated: Boolean;
+  RestServerSettings: TRestServerSettings;
 begin
   pServerCreated := RestServer.Initialized;
   // Unload current server if required
@@ -131,15 +245,20 @@ begin
   if ((ServerAction = lServerAction.Auto) and not pServerCreated) or ((ServerAction = lServerAction.Restart) and pServerCreated) or (ServerAction = lServerAction.Start) then
     begin
       // Create server object with selected Protocol and Auth mode
-      ServerSettings.Protocol := lProtocol(ComboBoxProtocol.ItemIndex);
-      ServerSettings.AuthMode := lAuthenticationMode(ComboBoxAuthentication.ItemIndex);
-      ServerSettings.Port := EditPort.Text;
-      RestServer.Initialize(ServerSettings);
+      RestServerSettings := TRestServerSettings.Create();
+      RestServerSettings.Protocol := lProtocol(ComboBoxProtocol.ItemIndex);
+      RestServerSettings.Port := EditPort.Text;
+      RestServerSettings.AuthenticationMode := lAuthenticationMode(ComboBoxAuthentication.ItemIndex);
+      RestServerSettings.AuthorizationPolicy := lAuthorizationPolicy(RadioGroupAuthorizationPolicy.ItemIndex);
+      // Fill method authorization rules from UI
+      FillMethodAuthorizationRulesFromUI(RestServerSettings);
+      // Start server
+      RestServer.Initialize(RestServerSettings);
     end;
 end;
 
 // Processing mORMot log event
-function TForm1.LogEvent(Sender: TTextWriter; Level: TSynLogInfo; const Text: RawUTF8): boolean;
+function TForm1.LogEvent(Sender: TTextWriter; Level: TSynLogInfo; const Text: RawUTF8): Boolean;
 var
   List: TList<TLocalLog>;
   LogEventData: TLocalLog;
@@ -201,11 +320,15 @@ begin
   case AM of
     NoAuthentication:
       Result := 'Disabled authentication.';
-    URI:
+    {
+      URI:
       Result := 'Weak authentication scheme using URL-level parameter';
-    SignedURI:
+    }
+    {
+      SignedURI:
       Result := 'Secure authentication scheme using URL-level digital signature - expected format of session_signature is:' + #13 + 'Hexa8(SessionID) + Hexa8(TimeStamp) + ' + #13 +
-        'Hexa8(crc32(SessionID + HexaSessionPrivateKey Sha256(salt + PassWord) + Hexa8(TimeStamp) + url))';
+      'Hexa8(crc32(SessionID + HexaSessionPrivateKey Sha256(salt + PassWord) + Hexa8(TimeStamp) + url))';
+    }
     Default:
       Result := 'mORMot secure RESTful authentication scheme, this method will use a password stored via safe SHA-256 hashing in the TSQLAuthUser ORM table';
     None:
@@ -267,6 +390,56 @@ begin
     TSQLLog.Family.Level := LOG_VERBOSE
   else
     TSQLLog.Family.Level := [];
+end;
+
+procedure TForm1.ListViewMethodGroupsSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
+begin
+  if Assigned(Item) then
+    begin
+      EditAllowGroupNames.Text := Item.SubItems.Strings[0];
+      EditDenyAllowGroupNames.Text := Item.SubItems.Strings[1];
+    end;
+end;
+
+procedure TForm1.ButtonSaveRoleConfigurationClick(Sender: TObject);
+var
+  Item: TListItem;
+begin
+  Item := ListViewMethodGroups.Selected;
+  if Assigned(Item) then
+    begin
+      Item.SubItems.Strings[0] := EditAllowGroupNames.Text;
+      Item.SubItems.Strings[1] := EditDenyAllowGroupNames.Text;
+      StartStopServer(lServerAction.Restart);
+    end;
+end;
+
+procedure TForm1.ListViewUsersSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
+begin
+  if Assigned(Item) then
+    begin
+      EditUserName.Text := Item.Caption;
+      EditUserPassword.Text := Item.SubItems.Strings[0];
+      EditUserGroup.Text := Item.SubItems.Strings[1];
+    end;
+end;
+
+procedure TForm1.ButtonSaveUsersClick(Sender: TObject);
+var
+  Item: TListItem;
+begin
+  Item := ListViewUsers.Selected;
+  if Assigned(Item) then
+    begin
+      Item.Caption := EditUserName.Text;
+      Item.SubItems.Strings[0] := EditUserPassword.Text;
+      Item.SubItems.Strings[1] := EditUserGroup.Text;
+    end;
+end;
+
+procedure TForm1.RadioGroupAuthorizationPolicyClick(Sender: TObject);
+begin
+  StartStopServer(lServerAction.Restart);
 end;
 
 end.

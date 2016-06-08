@@ -1,4 +1,4 @@
-﻿# mORMot.REST
+﻿﻿# mORMot.REST
 Testing mORMot REST capabilities.  
 It's my first meeting with mORMot, so, something may be unoptimized or implemented wrong.  
 Feel free to post your suggestions. Don't forget that this is not final build, there is a lot to do.
@@ -26,16 +26,14 @@ Category / Status | Feature
 `.` | IRestMethodsEx (session support, callback support).
 **Authentication schemes** |
 `done` | No authentication
-`.` | URI
-`.` | Signed URI
 `done` | Default
 `done` | None
 `done` | HTTP Basic
 `.` | SSPI
 **Authorization** |
-`.` | Allow all to execute any method
-`.` | Deny all to execute any method
-`.` | Follow method / group settings
+`done` | Allow all to execute any method
+`done` | Deny all to execute any method
+`done` | Follow method / group settings
 **jmx test plan** (without authentication) |
 `done` |  Method call via URL
 `done` |  Send parameters via body
@@ -47,6 +45,7 @@ Category / Status | Feature
 **Other** |
 `.` | HTTPS and certificates
 `.` | HTTP/s proxy bypass
+`.` | Improve spee while log output enabled
 
 Official Synopse mORMot repository [available here][mormot-repo].  
 Official Synopse mORMot documentation [available here][mormot-docs].

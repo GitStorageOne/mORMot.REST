@@ -1,10 +1,12 @@
 object Form1: TForm1
   Left = 0
   Top = 0
-  Caption = 'CL.mORMot REST HTTP test'
+  Caption = 'CL.mORMot REST test'
   ClientHeight = 469
   ClientWidth = 1174
   Color = clBtnFace
+  Constraints.MinHeight = 205
+  Constraints.MinWidth = 815
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -38,6 +40,7 @@ object Form1: TForm1
     Top = 11
     Width = 80
     Height = 13
+    Anchors = [akTop, akRight]
     Caption = 'Server and port:'
   end
   object Label2: TLabel
@@ -45,6 +48,7 @@ object Form1: TForm1
     Top = 38
     Width = 99
     Height = 13
+    Anchors = [akTop, akRight]
     Caption = 'Login and password:'
   end
   object EditServerAdress: TEdit
@@ -52,6 +56,7 @@ object Form1: TForm1
     Top = 8
     Width = 99
     Height = 21
+    Anchors = [akTop, akRight]
     TabOrder = 0
     Text = '127.0.0.1'
     TextHint = 'Server adress (IP or HostName)'
@@ -61,6 +66,7 @@ object Form1: TForm1
     Top = 8
     Width = 65
     Height = 21
+    Anchors = [akTop, akRight]
     TabOrder = 1
     Text = '777'
     TextHint = 'Port'
@@ -140,14 +146,12 @@ object Form1: TForm1
     Width = 276
     Height = 21
     Style = csDropDownList
-    ItemIndex = 0
+    ItemIndex = 1
     TabOrder = 4
-    Text = 'No authentication'
+    Text = 'Default'
     OnChange = ComboBoxAuthenticationChange
     Items.Strings = (
       'No authentication'
-      '// URI'
-      '// SignedURI'
       'Default'
       'None'
       'HttpBasic'
@@ -222,8 +226,9 @@ object Form1: TForm1
     Top = 35
     Width = 99
     Height = 21
+    Anchors = [akTop, akRight]
     TabOrder = 10
-    Text = 'User'
+    Text = 'George'
     TextHint = 'Login'
   end
   object EditUserPassword: TEdit
@@ -231,8 +236,9 @@ object Form1: TForm1
     Top = 35
     Width = 65
     Height = 21
+    Anchors = [akTop, akRight]
     TabOrder = 11
-    Text = 'synopse'
+    Text = '123'
     TextHint = 'Password'
   end
   object TimerRefreshLogMemo: TTimer

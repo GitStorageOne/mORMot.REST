@@ -17,7 +17,7 @@ uses
 
 type
   lProtocol = (HTTP_Socket, HTTP_HTTPsys, WebSocketBidir_JSON, WebSocketBidir_Binary, WebSocketBidir_BinaryAES, NamedPipe);
-  lAuthenticationMode = (NoAuthentication, URI, SignedURI, Default, None, HttpBasic, SSPI);
+  lAuthenticationMode = (NoAuthentication, Default, None, HttpBasic, SSPI);
 
   rClientSettings = record
     Protocol: lProtocol;
@@ -138,18 +138,6 @@ begin
       begin
         // nothing to do here
       end;
-    // TSQLRestServerAuthenticationURI
-    URI:
-      begin
-        // fClient.SetUser(Options.UserLogin, Options.UserPassword);
-        TSQLRestServerAuthenticationURI.ClientSetUser(fClient, fClientSettings.UserLogin, fClientSettings.UserPassword);
-      end;
-    {
-      // TSQLRestServerAuthenticationSignedURI
-      SignedURI:
-      begin
-      end;
-    }
     // TSQLRestServerAuthenticationDefault
     Default:
       begin

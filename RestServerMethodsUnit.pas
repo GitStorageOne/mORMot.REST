@@ -54,31 +54,26 @@ end;
 
 // [!] ServiceContext can be used from any method to access low level request data
 
-// Test 2
 function TRestMethods.HelloWorld(): string;
 begin
   Result := 'Hello world';
 end;
 
-// Test 2.1
 function TRestMethods.Sum(val1, val2: Double): Double;
 begin
   Result := val1 + val2;
 end;
 
-// Test 2.2
 function TRestMethods.GetCustomRecord(): rCustomRecord;
 begin
   Result.FillResultFromServer();
 end;
 
-// Test 2.3
 function TRestMethods.SendCustomRecord(const CustomResult: rCustomRecord): Boolean;
 begin
   Result := True;
 end;
 
-// Test 2.4
 function TRestMethods.SendMultipleCustomRecords(const CustomResult: rCustomRecord; const CustomComplicatedRecord: rCustomComplicatedRecord): Boolean;
 begin
   Result := True;
