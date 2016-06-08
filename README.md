@@ -46,6 +46,7 @@ Category / Status | Feature
 `.` | HTTPS and certificates
 `.` | HTTP/s proxy bypass
 `.` | Improve speed while log output enabled
+'?' | Apply roles and groups without restart (if possible, not sure, need check)
 `(optional)` | Refactoring
 
 Official Synopse mORMot repository [available here][mormot-repo].  
