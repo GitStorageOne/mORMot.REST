@@ -227,6 +227,11 @@ end;
 // Changing client authentication mode
 procedure TForm1.ComboBoxAuthenticationChange(Sender: TObject);
 begin
+  if lAuthenticationMode(ComboBoxAuthentication.ItemIndex) = lAuthenticationMode.SSPI then
+    begin
+      EditUserLogin.Text := '';
+      EditUserPassword.Text := '';
+    end;
   StartStopClient(Restart);
 end;
 

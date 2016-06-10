@@ -277,12 +277,15 @@ begin
             fRestServer.AuthenticationRegister(TSQLRestServerAuthenticationHttpBasic); // register single authentication mode
             ApplyAuthorizationRules(ServiceFactoryServer, fServerSettings);
           end;
-        {
-          // TSQLRestServerAuthenticationSSPI
-          SSPI:
+        // TSQLRestServerAuthenticationSSPI
+        SSPI:
           begin
+            fModel := TSQLModel.Create([], ROOT_NAME);
+            fRestServer := TSQLRestServerFullMemory.Create(fModel, false { make AuthenticationSchemesCount = 0 } );
+            ServiceFactoryServer := fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
+            fRestServer.AuthenticationRegister(TSQLRestServerAuthenticationSSPI); // register single authentication mode
+            ApplyAuthorizationRules(ServiceFactoryServer, fServerSettings);
           end;
-        }
       else
         begin
           DeInitialize();
@@ -359,8 +362,8 @@ begin
   Result := True;
   try
     // if used HttpApiRegisteringURI then remove registration (require run as admin), but seems not work from here
-    if Assigned(fHTTPServer) and (fHTTPServer.HTTPServer.ClassType = THttpApiServer) then
-      THttpApiServer(fHTTPServer.HTTPServer).RemoveUrl(ROOT_NAME, fHTTPServer.Port, false, '+');
+    if Assigned(fHTTPServer) and (fHTTPServer.HttpServer.ClassType = THttpApiServer) then
+      THttpApiServer(fHTTPServer.HttpServer).RemoveUrl(ROOT_NAME, fHTTPServer.Port, false, '+');
     if Assigned(fHTTPServer) then
       FreeAndNil(fHTTPServer);
     if Assigned(fRestServer) then

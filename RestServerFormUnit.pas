@@ -52,7 +52,6 @@ type
     EditUserGroup: TEdit;
     ButtonSaveUsers: TButton;
     EditUserName: TEdit;
-    ButtonAddUser: TButton;
     ButtonDeleteUser: TButton;
     EditUserPassword: TEdit;
     procedure ButtonStartStopClick(Sender: TObject);
@@ -69,6 +68,9 @@ type
     procedure ButtonSaveRoleConfigurationClick(Sender: TObject);
     procedure ButtonSaveUsersClick(Sender: TObject);
     procedure RadioGroupAuthorizationPolicyClick(Sender: TObject);
+    procedure ButtonDeleteUserClick(Sender: TObject);
+    procedure ListViewUsersClick(Sender: TObject);
+    procedure ListViewMethodGroupsClick(Sender: TObject);
   private
     function LogEvent(Sender: TTextWriter; Level: TSynLogInfo; const Text: RawUTF8): Boolean;
     function GetAuthModeDescription(AM: lAuthenticationMode): string;
@@ -427,19 +429,74 @@ end;
 procedure TForm1.ButtonSaveUsersClick(Sender: TObject);
 var
   Item: TListItem;
+  Done: Boolean;
 begin
+  Done := False;
   Item := ListViewUsers.Selected;
   if Assigned(Item) then
     begin
       Item.Caption := EditUserName.Text;
       Item.SubItems.Strings[0] := EditUserPassword.Text;
       Item.SubItems.Strings[1] := EditUserGroup.Text;
+      Done := True;
+    end
+  else if (EditUserName.Text <> '') and (EditUserGroup.Text <> '') then
+    begin
+      Item := ListViewUsers.Items.Add();
+      Item.Caption := EditUserName.Text;
+      Item.SubItems.Add(EditUserPassword.Text);
+      Item.SubItems.Add(EditUserGroup.Text);
+      Done := True;
+    end
+  else
+    ShowMessage('User name and Group must be filled.');
+  if Done then
+    begin
+      EditUserName.Text := '';
+      EditUserPassword.Text := '';
+      EditUserGroup.Text := '';
+      StartStopServer(lServerAction.Restart);
     end;
 end;
 
 procedure TForm1.RadioGroupAuthorizationPolicyClick(Sender: TObject);
 begin
   StartStopServer(lServerAction.Restart);
+end;
+
+procedure TForm1.ListViewMethodGroupsClick(Sender: TObject);
+begin
+  if ListViewMethodGroups.ItemIndex = -1 then
+    begin
+      EditAllowGroupNames.Text := '';
+      EditDenyAllowGroupNames.Text := '';
+    end;
+end;
+
+procedure TForm1.ListViewUsersClick(Sender: TObject);
+begin
+  if ListViewUsers.ItemIndex = -1 then
+    begin
+      EditUserName.Text := '';
+      EditUserPassword.Text := '';
+      EditUserGroup.Text := '';
+    end;
+end;
+
+// Delete user
+procedure TForm1.ButtonDeleteUserClick(Sender: TObject);
+var
+  SelUserIndex: integer;
+begin
+  SelUserIndex := ListViewUsers.ItemIndex;
+  if SelUserIndex <> -1 then
+    begin
+      ListViewUsers.Items.Delete(SelUserIndex);
+      EditUserName.Text := '';
+      EditUserPassword.Text := '';
+      EditUserGroup.Text := '';
+      StartStopServer(lServerAction.Restart);
+    end;
 end;
 
 end.

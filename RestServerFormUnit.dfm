@@ -120,7 +120,7 @@ object Form1: TForm1
       'Default'
       'None'
       'HttpBasic'
-      '// SSPI')
+      'SSPI')
   end
   object ButtonShowAuthorizationInfo: TButton
     Left = 423
@@ -195,6 +195,7 @@ object Form1: TForm1
           Subtitle = 'InstanceImplementation = sicSingle'
           TitleImage = -1
         end>
+      HideSelection = False
       Items.ItemData = {
         05860200000600000000000000FFFFFFFFFFFFFFFF0200000000000000000000
         000A480065006C006C006F0057006F0072006C00640014550073006500720073
@@ -222,6 +223,7 @@ object Form1: TForm1
       RowSelect = True
       TabOrder = 0
       ViewStyle = vsReport
+      OnClick = ListViewMethodGroupsClick
       OnSelectItem = ListViewMethodGroupsSelectItem
     end
     object ButtonSaveRoleConfiguration: TButton
@@ -289,6 +291,7 @@ object Form1: TForm1
           Caption = ' Group'
           Width = 110
         end>
+      HideSelection = False
       Items.ItemData = {
         05960000000200000000000000FFFFFFFFFFFFFFFF02000000FFFFFFFF000000
         0006470065006F0072006700650003310032003300B8EB761B0E410064006D00
@@ -299,10 +302,11 @@ object Form1: TForm1
       RowSelect = True
       TabOrder = 0
       ViewStyle = vsReport
+      OnClick = ListViewUsersClick
       OnSelectItem = ListViewUsersSelectItem
     end
     object EditUserGroup: TEdit
-      Left = 235
+      Left = 223
       Top = 157
       Width = 83
       Height = 21
@@ -310,44 +314,37 @@ object Form1: TForm1
       TextHint = 'Group'
     end
     object ButtonSaveUsers: TButton
-      Left = 324
+      Left = 312
       Top = 155
-      Width = 50
+      Width = 62
       Height = 25
-      Caption = 'Save'
+      Caption = 'Save/Add'
       TabOrder = 2
       OnClick = ButtonSaveUsersClick
     end
     object EditUserName: TEdit
-      Left = 65
+      Left = 53
       Top = 157
       Width = 83
       Height = 21
       TabOrder = 3
       TextHint = 'User'
     end
-    object ButtonAddUser: TButton
+    object ButtonDeleteUser: TButton
       Left = 9
       Top = 155
-      Width = 24
+      Width = 38
       Height = 25
-      Caption = '+'
+      Caption = 'DeL'
       TabOrder = 4
-    end
-    object ButtonDeleteUser: TButton
-      Left = 34
-      Top = 155
-      Width = 24
-      Height = 25
-      Caption = '-'
-      TabOrder = 5
+      OnClick = ButtonDeleteUserClick
     end
     object EditUserPassword: TEdit
-      Left = 150
+      Left = 138
       Top = 157
       Width = 83
       Height = 21
-      TabOrder = 6
+      TabOrder = 5
       TextHint = 'Password'
     end
   end

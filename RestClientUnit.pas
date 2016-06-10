@@ -164,12 +164,11 @@ begin
       begin
         TSQLRestServerAuthenticationHttpBasic.ClientSetUser(fClient, fClientSettings.UserLogin, fClientSettings.UserPassword);
       end;
-    {
-      // TSQLRestServerAuthenticationSSPI
-      SSPI:
+    // TSQLRestServerAuthenticationSSPI
+    SSPI:
       begin
+        TSQLRestServerAuthenticationSSPI.ClientSetUser(fClient, fClientSettings.UserLogin, fClientSettings.UserPassword);
       end;
-    }
   else
     begin
       DeInitialize();

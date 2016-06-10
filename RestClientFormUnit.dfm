@@ -164,7 +164,7 @@ object Form1: TForm1
       'Default'
       'None'
       'HttpBasic'
-      '// SSPI')
+      'SSPI')
   end
   object MemoLog: TMemo
     Left = 8
