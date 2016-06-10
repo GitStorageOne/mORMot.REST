@@ -30,7 +30,7 @@ Category / Status | Feature
 `done` | Default
 `done` | None
 `done` | HTTP Basic
-`.` | SSPI
+`done` | SSPI
 **Authorization** |
 `done` | Allow all to execute any method
 `done` | Deny all to execute any method
