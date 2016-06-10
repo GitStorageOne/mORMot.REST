@@ -41,7 +41,7 @@ Category / Status | Feature
 `done` |  Method result as JSON object
 `done` |  Send JSON objects via body
 `done` |  Send multiple JSON objects via body
-`.` |  Method result as custom JSON string
+`done` |  Custom method result
 `.` | Detect empty parameters from server side
 **Other** |
 `.` | HTTPS and certificates

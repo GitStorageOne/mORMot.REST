@@ -26,14 +26,15 @@ type
     function GetCustomRecord(): rCustomRecord;
     function SendCustomRecord(const CustomResult: rCustomRecord): Boolean;
     function SendMultipleCustomRecords(const CustomResult: rCustomRecord; const CustomComplicatedRecord: rCustomComplicatedRecord): Boolean;
-    // function GetMethodCustomResult(): TServiceCustomAnswer; // without default {result:[]}
+    function GetMethodCustomResult(): TServiceCustomAnswer; // without default {result:[]}
     // function ProperErrorHanding(): boolean;
   end;
 
 const
   ROOT_NAME = 'service';
-  SERVICE_INSTANCE_IMPLEMENTATION = TServiceInstanceImplementation.sicClientDriven;
+  SERVICE_INSTANCE_IMPLEMENTATION = TServiceInstanceImplementation.sicSingle;
   NAMED_PIPE_NAME = 'Rest_Test.0001';
+  CONNECTION_TIMEOUT = 3000; // Default mORMot value
 
 implementation
 

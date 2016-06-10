@@ -32,6 +32,7 @@ type
     function GetCustomRecord(): rCustomRecord;
     function SendCustomRecord(const CustomResult: rCustomRecord): Boolean;
     function SendMultipleCustomRecords(const CustomResult: rCustomRecord; const CustomComplicatedRecord: rCustomComplicatedRecord): Boolean;
+    function GetMethodCustomResult(): TServiceCustomAnswer; // without default {result:[]}
   end;
 
 implementation
@@ -77,6 +78,13 @@ end;
 function TRestMethods.SendMultipleCustomRecords(const CustomResult: rCustomRecord; const CustomComplicatedRecord: rCustomComplicatedRecord): Boolean;
 begin
   Result := True;
+end;
+
+function TRestMethods.GetMethodCustomResult(): TServiceCustomAnswer;
+begin
+  Result.Header := 'Content-type: UTF-8';
+  Result.Content := 'I am custom result, no "result:[]" used.';
+  Result.Status := 200;
 end;
 
 end.

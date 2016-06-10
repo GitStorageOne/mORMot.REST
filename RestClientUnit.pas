@@ -38,11 +38,11 @@ type
   tRestClient = class
   private
     fModel: TSQLModel;
-    fClient: TSQLRestClientURI;
     fClientSettings: rClientSettings;
     fConnectionSettings: rConnectionSettings;
     fInitialized: boolean;
   public
+    fClient: TSQLRestClientURI;
     RestMethods: IRestMethods;
     property Initialized: boolean read fInitialized;
     constructor Create();
@@ -98,34 +98,39 @@ begin
       begin
         fClient := TSQLHttpClientWinSock.Create(AnsiString(fClientSettings.HostOrIP), AnsiString(fClientSettings.Port), fModel, fConnectionSettings.SendTimeout, fConnectionSettings.ReceiveTimeout,
           fConnectionSettings.ConnectTimeout);
-        fClient.ServerInternalState
+        TSQLHttpClientWinSock(fClient).KeepAliveMS := CONNECTION_TIMEOUT;
       end;
     HTTP_HTTPsys:
       begin
         fClient := TSQLHttpClientWinHTTP.Create(AnsiString(fClientSettings.HostOrIP), AnsiString(fClientSettings.Port), fModel, fConnectionSettings.SendTimeout, fConnectionSettings.ReceiveTimeout,
           fConnectionSettings.ConnectTimeout);
+        TSQLHttpClientWinHTTP(fClient).KeepAliveMS := CONNECTION_TIMEOUT;
       end;
     HTTP_WebSocket:
       begin
         fClient := TSQLHttpClientWebsockets.Create(AnsiString(fClientSettings.HostOrIP), AnsiString(fClientSettings.Port), fModel, fConnectionSettings.SendTimeout, fConnectionSettings.ReceiveTimeout,
           fConnectionSettings.ConnectTimeout);
+        TSQLHttpClientWebsockets(fClient).KeepAliveMS := CONNECTION_TIMEOUT;
       end;
     WebSocketBidir_JSON:
       begin
         fClient := TSQLHttpClientWebsockets.Create(AnsiString(fClientSettings.HostOrIP), AnsiString(fClientSettings.Port), fModel, fConnectionSettings.SendTimeout, fConnectionSettings.ReceiveTimeout,
           fConnectionSettings.ConnectTimeout);
+        TSQLHttpClientWebsockets(fClient).KeepAliveMS := CONNECTION_TIMEOUT;
         (fClient as TSQLHttpClientWebsockets).WebSocketsUpgrade('', True);
       end;
     WebSocketBidir_Binary:
       begin
         fClient := TSQLHttpClientWebsockets.Create(AnsiString(fClientSettings.HostOrIP), AnsiString(fClientSettings.Port), fModel, fConnectionSettings.SendTimeout, fConnectionSettings.ReceiveTimeout,
           fConnectionSettings.ConnectTimeout);
+        TSQLHttpClientWebsockets(fClient).KeepAliveMS := CONNECTION_TIMEOUT;
         (fClient as TSQLHttpClientWebsockets).WebSocketsUpgrade('', False);
       end;
     WebSocketBidir_BinaryAES:
       begin
         fClient := TSQLHttpClientWebsockets.Create(AnsiString(fClientSettings.HostOrIP), AnsiString(fClientSettings.Port), fModel, fConnectionSettings.SendTimeout, fConnectionSettings.ReceiveTimeout,
           fConnectionSettings.ConnectTimeout);
+        TSQLHttpClientWebsockets(fClient).KeepAliveMS := CONNECTION_TIMEOUT;
         (fClient as TSQLHttpClientWebsockets).WebSocketsUpgrade('2141D32ADAD54D9A9DB56000CC9A4A70', False);
       end;
     NamedPipe:

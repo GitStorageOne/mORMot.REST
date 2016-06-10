@@ -90,9 +90,9 @@ object Form1: TForm1
   object GroupBoxIRestMethods: TGroupBox
     Left = 8
     Top = 75
-    Width = 577
+    Width = 720
     Height = 54
-    Caption = 'IRestMethods (InstanceImplementation = sicClientDriven)'
+    Caption = 'IRestMethods (InstanceImplementation = sicSingle)'
     TabOrder = 3
     object ButtonMethHelloWorld: TButton
       Left = 8
@@ -138,6 +138,15 @@ object Form1: TForm1
       Caption = 'SendMultipleCustomRecords'
       TabOrder = 4
       OnClick = ButtonMethSendMultipleCustomRecordsClick
+    end
+    object ButtonMethGetMethodCustomResult: TButton
+      Left = 572
+      Top = 19
+      Width = 141
+      Height = 23
+      Caption = 'GetMethodCustomResult'
+      TabOrder = 5
+      OnClick = ButtonMethGetMethodCustomResultClick
     end
   end
   object ComboBoxAuthentication: TComboBox

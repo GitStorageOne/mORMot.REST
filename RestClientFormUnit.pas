@@ -20,6 +20,7 @@ uses
   mORMot,
   SynLog,
   SynCommons,
+  mORMotHttpClient, // tmp
   // Custom
   RestClientUnit,
   RestMethodsInterfaceUnit;
@@ -55,6 +56,7 @@ type
     EditUserPassword: TEdit;
     Label1: TLabel;
     Label2: TLabel;
+    ButtonMethGetMethodCustomResult: TButton;
     procedure FormCreate(Sender: TObject);
     procedure ButtonStartStopClick(Sender: TObject);
     procedure ButtonCLSClick(Sender: TObject);
@@ -68,6 +70,7 @@ type
     procedure CheckBoxDisableLogClick(Sender: TObject);
     procedure ButtonMethSendMultipleCustomRecordsClick(Sender: TObject);
     procedure ComboBoxProtocolChange(Sender: TObject);
+    procedure ButtonMethGetMethodCustomResultClick(Sender: TObject);
   private
     { Private declarations }
     function LogEvent(Sender: TTextWriter; Level: TSynLogInfo; const Text: RawUTF8): boolean;
@@ -294,6 +297,14 @@ begin
       ccr.AnotherRecord := cr;
       RestClient.RestMethods.SendMultipleCustomRecords(cr, ccr);
     end;
+end;
+
+procedure TForm1.ButtonMethGetMethodCustomResultClick(Sender: TObject);
+var
+  ServiceCustomAnswer: TServiceCustomAnswer;
+begin
+  if Assigned(RestClient.RestMethods) then
+    ServiceCustomAnswer := RestClient.RestMethods.GetMethodCustomResult();
 end;
 
 end.

@@ -294,35 +294,42 @@ begin
         HTTP_Socket:
           begin
             fHTTPServer := TSQLHttpServer.Create(AnsiString(fServerSettings.Port), [fRestServer], '+', useHttpSocket);
+            THttpServer(fHTTPServer.HttpServer).ServerKeepAliveTimeOut := CONNECTION_TIMEOUT;
           end;
         {
           // require manual URI registration, we will not use this option
           HTTPsys:
           begin
           HTTPServer := TSQLHttpServer.Create(AnsiString(Options.Port), [RestServer], '+', useHttpApi);
+          THttpServer(fHTTPServer.HttpServer).ServerKeepAliveTimeOut := SERVER_CONNECTION_TIMEOUT;
           end;
         }
         HTTPsys:
           begin
             fHTTPServer := TSQLHttpServer.Create(AnsiString(fServerSettings.Port), [fRestServer], '+', useHttpApiRegisteringURI);
+            THttpServer(fHTTPServer.HttpServer).ServerKeepAliveTimeOut := CONNECTION_TIMEOUT;
           end;
         HTTP_WebSocket:
           begin
             fHTTPServer := TSQLHttpServer.Create(AnsiString(fServerSettings.Port), [fRestServer], '+', useBidirSocket);
+            TWebSocketServerRest(fHTTPServer.HttpServer).ServerKeepAliveTimeOut := CONNECTION_TIMEOUT;
           end;
         WebSocketBidir_JSON:
           begin
             fHTTPServer := TSQLHttpServer.Create(AnsiString(fServerSettings.Port), [fRestServer], '+', useBidirSocket);
+            TWebSocketServerRest(fHTTPServer.HttpServer).ServerKeepAliveTimeOut := CONNECTION_TIMEOUT;
             { WebSocketServerRest := } fHTTPServer.WebSocketsEnable(fRestServer, '', True);
           end;
         WebSocketBidir_Binary:
           begin
             fHTTPServer := TSQLHttpServer.Create(AnsiString(fServerSettings.Port), [fRestServer], '+', useBidirSocket);
+            TWebSocketServerRest(fHTTPServer.HttpServer).ServerKeepAliveTimeOut := CONNECTION_TIMEOUT;
             { WebSocketServerRest := } fHTTPServer.WebSocketsEnable(fRestServer, '', false);
           end;
         WebSocketBidir_BinaryAES:
           begin
             fHTTPServer := TSQLHttpServer.Create(AnsiString(fServerSettings.Port), [fRestServer], '+', useBidirSocket);
+            TWebSocketServerRest(fHTTPServer.HttpServer).ServerKeepAliveTimeOut := CONNECTION_TIMEOUT;
             { WebSocketServerRest := } fHTTPServer.WebSocketsEnable(fRestServer, '2141D32ADAD54D9A9DB56000CC9A4A70', false);
           end;
         NamedPipe:
