@@ -92,7 +92,7 @@ object Form1: TForm1
     Top = 75
     Width = 577
     Height = 54
-    Caption = 'IRestMethods (InstanceImplementation = sicSingle)'
+    Caption = 'IRestMethods (InstanceImplementation = sicClientDriven)'
     TabOrder = 3
     object ButtonMethHelloWorld: TButton
       Left = 8
