@@ -16,7 +16,7 @@ uses
   RestMethodsInterfaceUnit;
 
 type
-  lProtocol = (HTTP_Socket, HTTP_HTTPsys, WebSocketBidir_JSON, WebSocketBidir_Binary, WebSocketBidir_BinaryAES, NamedPipe);
+  lProtocol = (HTTP_Socket, HTTP_HTTPsys, HTTP_WebSocket, WebSocketBidir_JSON, WebSocketBidir_Binary, WebSocketBidir_BinaryAES, NamedPipe);
   lAuthenticationMode = (NoAuthentication, Default, None, HttpBasic, SSPI);
 
   rClientSettings = record
@@ -98,10 +98,16 @@ begin
       begin
         fClient := TSQLHttpClientWinSock.Create(AnsiString(fClientSettings.HostOrIP), AnsiString(fClientSettings.Port), fModel, fConnectionSettings.SendTimeout, fConnectionSettings.ReceiveTimeout,
           fConnectionSettings.ConnectTimeout);
+        fClient.ServerInternalState
       end;
     HTTP_HTTPsys:
       begin
         fClient := TSQLHttpClientWinHTTP.Create(AnsiString(fClientSettings.HostOrIP), AnsiString(fClientSettings.Port), fModel, fConnectionSettings.SendTimeout, fConnectionSettings.ReceiveTimeout,
+          fConnectionSettings.ConnectTimeout);
+      end;
+    HTTP_WebSocket:
+      begin
+        fClient := TSQLHttpClientWebsockets.Create(AnsiString(fClientSettings.HostOrIP), AnsiString(fClientSettings.Port), fModel, fConnectionSettings.SendTimeout, fConnectionSettings.ReceiveTimeout,
           fConnectionSettings.ConnectTimeout);
       end;
     WebSocketBidir_JSON:
@@ -124,7 +130,7 @@ begin
       end;
     NamedPipe:
       begin
-       fClient := TSQLRestClientURINamedPipe.Create(fModel, '\\' + fClientSettings.HostOrIP + '\pipe\mORMot_' + NAMED_PIPE_NAME);
+        fClient := TSQLRestClientURINamedPipe.Create(fModel, '\\' + fClientSettings.HostOrIP + '\pipe\mORMot_' + NAMED_PIPE_NAME);
       end;
   else
     begin
@@ -180,11 +186,11 @@ end;
 
 procedure tRestClient.DeInitialize();
 begin
+  RestMethods := nil;
   if Assigned(fClient) then
     FreeAndNil(fClient);
   if Assigned(fModel) then
     FreeAndNil(fModel);
-  RestMethods := nil;
   fInitialized := False;
 end;
 

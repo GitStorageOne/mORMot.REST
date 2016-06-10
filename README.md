@@ -17,6 +17,7 @@ Category / Status | Feature
 **Protocol usage** |
 `done` |  HTTP (socket)
 `done` |  HTTP (http.sys)
+`done` |  HTTP (web socket)
 `done` |  WebSocket (bidirectional, JSON)
 `done` |  WebSocket (bidirectional, Binary)
 `done` |  WebSocket (bidirectional, Binary + AES)

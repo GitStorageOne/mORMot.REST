@@ -32,7 +32,7 @@ type
 
 const
   ROOT_NAME = 'service';
-  SERVICE_INSTANCE_IMPLEMENTATION = TServiceInstanceImplementation.sicSingle;
+  SERVICE_INSTANCE_IMPLEMENTATION = TServiceInstanceImplementation.sicClientDriven;
   NAMED_PIPE_NAME = 'Rest_Test.0001';
 
 implementation

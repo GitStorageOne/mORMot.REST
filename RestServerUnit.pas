@@ -20,7 +20,7 @@ uses
   RestServerMethodsUnit;
 
 type
-  lProtocol = (HTTP_Socket, HTTPsys, WebSocketBidir_JSON, WebSocketBidir_Binary, WebSocketBidir_BinaryAES, NamedPipe);
+  lProtocol = (HTTP_Socket, HTTPsys, HTTP_WebSocket, WebSocketBidir_JSON, WebSocketBidir_Binary, WebSocketBidir_BinaryAES, NamedPipe);
   lAuthenticationMode = (NoAuthentication, Default, None, HttpBasic, SSPI);
   lAuthorizationPolicy = (AllowAll, DenyAll, FollowGroupsSettings);
 
@@ -223,7 +223,7 @@ begin
             // ServiceFactoryServer.DenyByName([MethodAuthorizationSettings.MethodName], MethodAuthorizationSettings.DeniedGroups);
             for j := 0 to Length(MethodAuthorizationSettings.AllowedGroups) - 1 do
               ServiceFactoryServer.AllowByName([MethodAuthorizationSettings.MethodName], MethodAuthorizationSettings.AllowedGroups[j]);
-            for j := 0 to Length(MethodAuthorizationSettings.DeniedGroups)  - 1 do
+            for j := 0 to Length(MethodAuthorizationSettings.DeniedGroups) - 1 do
               ServiceFactoryServer.DenyByName([MethodAuthorizationSettings.MethodName], MethodAuthorizationSettings.DeniedGroups[j]);
           end;
       end;
@@ -305,6 +305,10 @@ begin
         HTTPsys:
           begin
             fHTTPServer := TSQLHttpServer.Create(AnsiString(fServerSettings.Port), [fRestServer], '+', useHttpApiRegisteringURI);
+          end;
+        HTTP_WebSocket:
+          begin
+            fHTTPServer := TSQLHttpServer.Create(AnsiString(fServerSettings.Port), [fRestServer], '+', useBidirSocket);
           end;
         WebSocketBidir_JSON:
           begin

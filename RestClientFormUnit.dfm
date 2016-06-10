@@ -143,7 +143,7 @@ object Form1: TForm1
   object ComboBoxAuthentication: TComboBox
     Left = 117
     Top = 35
-    Width = 276
+    Width = 300
     Height = 21
     Style = csDropDownList
     ItemIndex = 1
@@ -206,19 +206,20 @@ object Form1: TForm1
   object ComboBoxProtocol: TComboBox
     Left = 117
     Top = 8
-    Width = 276
+    Width = 300
     Height = 21
     Style = csDropDownList
-    ItemIndex = 0
+    ItemIndex = 2
     TabOrder = 9
-    Text = 'HTTP ( socket )'
+    Text = 'HTTP ( web socket )'
     OnChange = ComboBoxProtocolChange
     Items.Strings = (
       'HTTP ( socket )'
-      'HTTP ( fast http.sys )'
-      'WebSocket ( bidirectional, JSON )'
-      'WebSocket ( bidirectional, binary )'
-      'WebSocket ( bidirectional, binary + AES-CFB 256)'
+      '  HTTP ( fast http.sys )'
+      'HTTP ( web socket )'
+      '  WebSocket ( bidirectional, JSON )'
+      '  WebSocket ( bidirectional, binary )'
+      '  WebSocket ( bidirectional, binary + AES-CFB 256)'
       'Named pipe')
   end
   object EditUserLogin: TEdit
