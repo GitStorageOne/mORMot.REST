@@ -218,17 +218,18 @@ object Form1: TForm1
     Width = 300
     Height = 21
     Style = csDropDownList
-    ItemIndex = 2
+    ItemIndex = 6
     TabOrder = 9
-    Text = 'HTTP ( web socket )'
+    Text = ' '#8250' WebSocket ( bidirectional, binary + AES-CFB 256)'
     OnChange = ComboBoxProtocolChange
     Items.Strings = (
-      'HTTP ( socket )'
-      '  HTTP ( fast http.sys )'
-      'HTTP ( web socket )'
-      '  WebSocket ( bidirectional, JSON )'
-      '  WebSocket ( bidirectional, binary )'
-      '  WebSocket ( bidirectional, binary + AES-CFB 256)'
+      'HTTP             ( socket )'
+      ' '#8250' HTTP          ( fast http.sys )'
+      ' '#8250#8250' HTTP        ( fast http.sys + AES-CFB 256 )'
+      'HTTP             ( web socket )'
+      ' '#8250' WebSocket ( bidirectional, JSON )'
+      ' '#8250' WebSocket ( bidirectional, binary )'
+      ' '#8250' WebSocket ( bidirectional, binary + AES-CFB 256)'
       'Named pipe')
   end
   object EditUserLogin: TEdit

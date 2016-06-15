@@ -20,7 +20,7 @@ uses
   RestServerMethodsUnit;
 
 type
-  lProtocol = (HTTP_Socket, HTTPsys, HTTP_WebSocket, WebSocketBidir_JSON, WebSocketBidir_Binary, WebSocketBidir_BinaryAES, NamedPipe);
+  lProtocol = (HTTP_Socket, HTTPsys, HTTPsys_SSL, HTTPsys_AES, HTTP_WebSocket, WebSocketBidir_JSON, WebSocketBidir_Binary, WebSocketBidir_BinaryAES, NamedPipe);
   lAuthenticationMode = (NoAuthentication, Default, None, HttpBasic, SSPI);
   lAuthorizationPolicy = (AllowAll, DenyAll, FollowGroupsSettings);
 
@@ -76,6 +76,9 @@ type
     function Initialize(SrvSettings: TRestServerSettings): boolean;
     function DeInitialize(): boolean;
   end;
+
+const
+  AppID = '{AA4AC37D-B812-46A7-BEFB-A68167A05BA7}';
 
 var
   RestServer: tRestServer;
@@ -248,7 +251,8 @@ begin
           begin
             fModel := TSQLModel.Create([], ROOT_NAME);
             fRestServer := TSQLRestServerFullMemory.Create(fModel, false);
-            fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
+            ServiceFactoryServer := fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
+            ServiceFactoryServer.SetOptions([], [optErrorOnMissingParam]);
           end;
         // TSQLRestServerAuthenticationDefault
         Default:
@@ -258,6 +262,7 @@ begin
             ServiceFactoryServer := fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
             fRestServer.AuthenticationRegister(TSQLRestServerAuthenticationDefault); // register single authentication mode
             ApplyAuthorizationRules(ServiceFactoryServer, fServerSettings);
+            ServiceFactoryServer.SetOptions([], [optErrorOnMissingParam]);
           end;
         // TSQLRestServerAuthenticationNone
         None:
@@ -267,6 +272,7 @@ begin
             ServiceFactoryServer := fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
             fRestServer.AuthenticationRegister(TSQLRestServerAuthenticationNone); // register single authentication mode
             ApplyAuthorizationRules(ServiceFactoryServer, fServerSettings);
+            ServiceFactoryServer.SetOptions([], [optErrorOnMissingParam]);
           end;
         // TSQLRestServerAuthenticationHttpBasic
         HttpBasic:
@@ -276,6 +282,7 @@ begin
             ServiceFactoryServer := fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
             fRestServer.AuthenticationRegister(TSQLRestServerAuthenticationHttpBasic); // register single authentication mode
             ApplyAuthorizationRules(ServiceFactoryServer, fServerSettings);
+            ServiceFactoryServer.SetOptions([], [optErrorOnMissingParam]);
           end;
         // TSQLRestServerAuthenticationSSPI
         SSPI:
@@ -285,6 +292,7 @@ begin
             ServiceFactoryServer := fRestServer.ServiceDefine(TRestMethods, [IRestMethods], SERVICE_INSTANCE_IMPLEMENTATION);
             fRestServer.AuthenticationRegister(TSQLRestServerAuthenticationSSPI); // register single authentication mode
             ApplyAuthorizationRules(ServiceFactoryServer, fServerSettings);
+            ServiceFactoryServer.SetOptions([], [optErrorOnMissingParam]);
           end;
       else
         begin
@@ -300,7 +308,8 @@ begin
             THttpServer(fHTTPServer.HttpServer).ServerKeepAliveTimeOut := CONNECTION_TIMEOUT;
           end;
         {
-          // require manual URI registration, we will not use this option
+          // require manual URI registration, we will not use this option in this test project, because this option
+          // should be used with installation program that will unregister all used URIs during sofware uninstallation.
           HTTPsys:
           begin
           HTTPServer := TSQLHttpServer.Create(AnsiString(Options.Port), [RestServer], '+', useHttpApi);
@@ -310,6 +319,16 @@ begin
         HTTPsys:
           begin
             fHTTPServer := TSQLHttpServer.Create(AnsiString(fServerSettings.Port), [fRestServer], '+', useHttpApiRegisteringURI);
+            THttpServer(fHTTPServer.HttpServer).ServerKeepAliveTimeOut := CONNECTION_TIMEOUT;
+          end;
+        HTTPsys_SSL:
+          begin
+            fHTTPServer := TSQLHttpServer.Create(AnsiString(fServerSettings.Port), [fRestServer], '+', useHttpApiRegisteringURI, 32, TSQLHttpServerSecurity.secSSL);
+            THttpServer(fHTTPServer.HttpServer).ServerKeepAliveTimeOut := CONNECTION_TIMEOUT;
+          end;
+        HTTPsys_AES:
+          begin
+            fHTTPServer := TSQLHttpServer.Create(AnsiString(fServerSettings.Port), [fRestServer], '+', useHttpApiRegisteringURI, 32, TSQLHttpServerSecurity.secSynShaAes);
             THttpServer(fHTTPServer.HttpServer).ServerKeepAliveTimeOut := CONNECTION_TIMEOUT;
           end;
         HTTP_WebSocket:
@@ -363,7 +382,7 @@ begin
   try
     // if used HttpApiRegisteringURI then remove registration (require run as admin), but seems not work from here
     if Assigned(fHTTPServer) and (fHTTPServer.HttpServer.ClassType = THttpApiServer) then
-      THttpApiServer(fHTTPServer.HttpServer).RemoveUrl(ROOT_NAME, fHTTPServer.Port, false, '+');
+      THttpApiServer(fHTTPServer.HttpServer).RemoveUrl(ROOT_NAME, fHTTPServer.Port, fServerSettings.Protocol = HTTPsys_SSL, '+');
     if Assigned(fHTTPServer) then
       FreeAndNil(fHTTPServer);
     if Assigned(fRestServer) then

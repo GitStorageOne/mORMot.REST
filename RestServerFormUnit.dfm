@@ -108,7 +108,7 @@ object Form1: TForm1
   object ComboBoxAuthentication: TComboBox
     Left = 117
     Top = 35
-    Width = 300
+    Width = 388
     Height = 21
     Style = csDropDownList
     ItemIndex = 1
@@ -123,7 +123,7 @@ object Form1: TForm1
       'SSPI')
   end
   object ButtonShowAuthorizationInfo: TButton
-    Left = 423
+    Left = 511
     Top = 36
     Width = 42
     Height = 19
@@ -144,20 +144,27 @@ object Form1: TForm1
   object ComboBoxProtocol: TComboBox
     Left = 117
     Top = 8
-    Width = 300
+    Width = 388
     Height = 21
     Style = csDropDownList
-    ItemIndex = 2
+    DropDownCount = 10
+    ItemIndex = 7
     TabOrder = 8
-    Text = 'HTTP ( web socket )'
+    Text = ' '#8250' WebSocket ( bidirectional, binary + AES-CFB 256)'
     OnChange = ComboBoxProtocolChange
     Items.Strings = (
-      'HTTP ( socket )'
-      '  HTTP ( fast http.sys - require admin rights else socket )'
-      'HTTP ( web socket )'
-      '  WebSocket ( bidirectional, JSON )'
-      '  WebSocket ( bidirectional, binary )'
-      '  WebSocket ( bidirectional, binary + AES-CFB 256)'
+      'HTTP              ( socket )'
+      
+        ' '#8250' HTTP           ( fast http.sys // require admin rights else s' +
+        'ocket )'
+      ' '#8250#8250' // HTTPS   ( fast http.sys + SSL // require admin rights )'
+      
+        ' '#8250' HTTP           ( fast http.sys + AES-CFB 256 // require admin' +
+        ' rights )'
+      'HTTP              ( web socket )'
+      ' '#8250' WebSocket ( bidirectional, JSON )'
+      ' '#8250' WebSocket ( bidirectional, binary )'
+      ' '#8250' WebSocket ( bidirectional, binary + AES-CFB 256)'
       'Named pipe')
   end
   object GroupBoxMethodGroupConfiguration: TGroupBox

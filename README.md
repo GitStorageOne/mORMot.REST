@@ -15,13 +15,15 @@ Category / Status | Feature
 **mORMot REST architecture** |
 `done` | Services via interfaces
 **Protocol usage** |
-`done` |  HTTP (socket)
-`done` |  HTTP (http.sys)
-`done` |  HTTP (web socket)
-`done` |  WebSocket (bidirectional, JSON)
-`done` |  WebSocket (bidirectional, Binary)
-`done` |  WebSocket (bidirectional, Binary + AES)
-`done` |  Named pipe (on local PC or LAN network)
+`done` | HTTP (socket)
+`done` | › HTTP (http.sys)
+`.`    | ›› HTTPS (http.sys + SSL)
+`done` | › HTTP (http.sys + AES-CFB 256)
+`done` | HTTP (web socket)
+`done` | › WebSocket (bidirectional, JSON)
+`done` | › WebSocket (bidirectional, Binary)
+`done` | › WebSocket (bidirectional, Binary + AES)
+`done` | Named pipe (on local PC or LAN network)
 **Method interfaces** |
 `done` | IRestMethods (no session support).
 `.` | IRestMethodsEx (session support, callback support).
@@ -36,15 +38,14 @@ Category / Status | Feature
 `done` | Deny all to execute any method
 `done` | Follow method / group settings
 **jmx test plan** (without authentication) |
-`done` |  Method call via URL
-`done` |  Send parameters via body
-`done` |  Method result as JSON object
-`done` |  Send JSON objects via body
-`done` |  Send multiple JSON objects via body
-`done` |  Custom method result
-`.` | Detect empty parameters from server side
+`done` | Method call via URL
+`done` | Send parameters via body
+`done` | Method result as JSON object
+`done` | Send JSON objects via body
+`done` | Send multiple JSON objects via body
+`done` | Custom method result
+`done` | Detect empty parameters from server side
 **Other** |
-`.` | HTTPS and certificates
 `.` | HTTP/s proxy bypass
 `.` | Improve speed while log output enabled
 `?` | Apply roles and groups without restart (if possible, not sure, need check)
