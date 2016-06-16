@@ -54,6 +54,7 @@ type
     EditUserName: TEdit;
     ButtonDeleteUser: TButton;
     EditUserPassword: TEdit;
+    LabelHTTPSnote: TLabel;
     procedure ButtonStartStopClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure ButtonCLSClick(Sender: TObject);
@@ -355,6 +356,7 @@ end;
 // Changing server protocol
 procedure TForm1.ComboBoxProtocolChange(Sender: TObject);
 begin
+  LabelHTTPSnote.Visible := (lProtocol(ComboBoxProtocol.ItemIndex) = HTTPsys_SSL);
   StartStopServer(Restart);
 end;
 

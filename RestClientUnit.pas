@@ -16,7 +16,7 @@ uses
   RestMethodsInterfaceUnit;
 
 type
-  lProtocol = (HTTP_Socket, HTTP_HTTPsys, HTTPsys_AES, HTTP_WebSocket, WebSocketBidir_JSON, WebSocketBidir_Binary, WebSocketBidir_BinaryAES, NamedPipe);
+  lProtocol = (HTTP_Socket, HTTP_HTTPsys, HTTPsys_SSL, HTTPsys_AES, HTTP_WebSocket, WebSocketBidir_JSON, WebSocketBidir_Binary, WebSocketBidir_BinaryAES, NamedPipe);
   lAuthenticationMode = (NoAuthentication, Default, None, HttpBasic, SSPI);
 
   rClientSettings = record
@@ -105,6 +105,14 @@ begin
         fClient := TSQLHttpClientWinHTTP.Create(AnsiString(fClientSettings.HostOrIP), AnsiString(fClientSettings.Port), fModel, fConnectionSettings.SendTimeout, fConnectionSettings.ReceiveTimeout,
           fConnectionSettings.ConnectTimeout);
         TSQLHttpClientWinHTTP(fClient).KeepAliveMS := CONNECTION_TIMEOUT;
+        TSQLHttpClientWinHTTP(fClient).Compression := [hcSynShaAes];
+      end;
+    HTTPsys_SSL:
+      begin
+        fClient := TSQLHttpClientWinHTTP.Create(AnsiString(fClientSettings.HostOrIP), AnsiString(fClientSettings.Port), fModel, True, '', '', fConnectionSettings.SendTimeout,
+          fConnectionSettings.ReceiveTimeout, fConnectionSettings.ConnectTimeout);
+        TSQLHttpClientWinHTTP(fClient).KeepAliveMS := CONNECTION_TIMEOUT;
+        TSQLHttpClientWinHTTP(fClient).Compression := [hcSynShaAes];
       end;
     HTTPsys_AES:
       begin

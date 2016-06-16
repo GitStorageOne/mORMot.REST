@@ -17,7 +17,7 @@ Category / Status | Feature
 **Protocol usage** |
 `done` | HTTP (socket)
 `done` | › HTTP (http.sys)
-`.`    | ›› HTTPS (http.sys + SSL)
+`done` | ›› HTTPS (http.sys + SSL)
 `done` | › HTTP (http.sys + AES-CFB 256)
 `done` | HTTP (web socket)
 `done` | › WebSocket (bidirectional, JSON)
@@ -26,7 +26,7 @@ Category / Status | Feature
 `done` | Named pipe (on local PC or LAN network)
 **Method interfaces** |
 `done` | IRestMethods (no session support).
-`.` | IRestMethodsEx (session support, callback support).
+`.`    | IRestMethodsEx (session support, callback support).
 **Authentication schemes** |
 `done` | No authentication
 `done` | Default
@@ -46,9 +46,9 @@ Category / Status | Feature
 `done` | Custom method result
 `done` | Detect empty parameters from server side
 **Other** |
-`.` | HTTP/s proxy bypass
-`.` | Improve speed while log output enabled
-`?` | Apply roles and groups without restart (if possible, not sure, need check)
+`.`    | HTTP/s proxy bypass
+`.`    | Improve speed while log output enabled
+`?`    | Apply roles and groups without restart (if possible, not sure, need check)
 `(optional)` | Refactoring
 
 Official Synopse mORMot repository [available here][mormot-repo].  

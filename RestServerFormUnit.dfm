@@ -44,6 +44,21 @@ object Form1: TForm1
     Height = 13
     Caption = 'Protocol:'
   end
+  object LabelHTTPSnote: TLabel
+    Left = 511
+    Top = 11
+    Width = 235
+    Height = 13
+    Caption = 'Don'#39't forget enable https support (check exe dir)'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = 136
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    Visible = False
+    StyleElements = [seClient, seBorder]
+  end
   object EditPort: TEdit
     Left = 897
     Top = 25
@@ -157,7 +172,7 @@ object Form1: TForm1
       
         ' '#8250' HTTP           ( fast http.sys // require admin rights else s' +
         'ocket )'
-      ' '#8250#8250' // HTTPS   ( fast http.sys + SSL // require admin rights )'
+      ' '#8250#8250' HTTPS        ( fast http.sys + SSL // require admin rights )'
       
         ' '#8250' HTTP           ( fast http.sys + AES-CFB 256 // require admin' +
         ' rights )'
