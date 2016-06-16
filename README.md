@@ -46,6 +46,7 @@ Category / Status | Feature
 `done` | Custom method result
 `done` | Detect empty parameters from server side
 **Other** |
+`.`    | Win7 certificate installation fix for https.
 `.`    | HTTP/s proxy bypass
 `.`    | Improve speed while log output enabled
 `?`    | Apply roles and groups without restart (if possible, not sure, need check)
