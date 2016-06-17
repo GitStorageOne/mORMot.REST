@@ -13,6 +13,7 @@ certutil -delstore "Root" "23 ee 2b 14 92 bb b8 80 34 79 89 7c 88 fa 0b 09 80 d2
 :: Remove URL listener from windows httpapi (temporary solution).
 :: This must be done from application, but not work for some reason.
 :: THttpApiServer(fHTTPServer.HttpServer).RemoveUrl(ROOT_NAME, fHTTPServer.Port, fServerSettings.Protocol = HTTPsys_SSL, '+');
+:: Use next command to check that URL was deleted: netsh http show urlacl
 netsh http delete urlacl http://+:%SSLPort%/service/
 netsh http delete urlacl https://+:%SSLPort%/service/
 

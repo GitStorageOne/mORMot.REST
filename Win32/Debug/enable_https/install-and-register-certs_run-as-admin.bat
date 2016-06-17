@@ -3,7 +3,7 @@ SET SSLPort=777
 
 :: Install certs
 :: You can use certlm.msc to ensure that sertificates was added.
-certutil -f -p 100500 -importpfx "My" "%~dp0mORMot-SSL-Test-All.p12"
+certutil -f -p 100500 -importpfx "%~dp0mORMot-SSL-Test-All.p12"
 
 :: Add SSL port
 :: You can use "netsh http show sslcert" to ensure that port was added.
