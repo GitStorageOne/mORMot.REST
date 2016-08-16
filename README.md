@@ -1,8 +1,7 @@
-﻿﻿# mORMot.REST  
+﻿﻿# mORMot.REST
 Testing mORMot REST capabilities.  
 It's my first meeting with mORMot, so, something may be unoptimized or implemented wrong.  
-Feel free to post your suggestions. Don't forget that this is not final build, there is a lot to do.  
-Latest version available here: https://github.com/GitStorageOne/mORMot.REST  
+Feel free to post your suggestions. Don't forget that this is not final build, there is a lot to do.
 
 I use REST services via interfaces, IMO it's more friendly for developers.  
 You may find that project group contain both server and client projects.  
