@@ -1,5 +1,10 @@
 ﻿﻿# mORMot.REST
-Testing mORMot REST capabilities.  
+Testing mORMot REST capabilities, a project from George.
+
+FPC version by Alf, retrieved from https://github.com/LongDirtyAnimAlf/mORMot.REST
+
+# Presentation
+
 It's my first meeting with mORMot, so, something may be unoptimized or implemented wrong.  
 Feel free to post your suggestions. Don't forget that this is not final build, there is a lot to do.
 
