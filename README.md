@@ -1,12 +1,8 @@
-﻿﻿# mORMot.REST
-Testing mORMot REST capabilities, a project from George.
-
-FPC version by Alf, retrieved from https://github.com/LongDirtyAnimAlf/mORMot.REST
-
-# Presentation
-
+﻿﻿# mORMot.REST  
+Testing mORMot REST capabilities.  
 It's my first meeting with mORMot, so, something may be unoptimized or implemented wrong.  
-Feel free to post your suggestions. Don't forget that this is not final build, there is a lot to do.
+Feel free to post your suggestions. Don't forget that this is not final build, there is a lot to do.  
+Latest version available here: https://github.com/GitStorageOne/mORMot.REST
 
 I use REST services via interfaces, IMO it's more friendly for developers.  
 You may find that project group contain both server and client projects.  
